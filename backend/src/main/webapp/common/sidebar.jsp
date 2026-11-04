@@ -58,10 +58,7 @@
 <!-- Mobile Menu Button (visible on mobile only) -->
 <div class="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-md border-b border-zinc-200/50 z-40 flex items-center justify-between px-4">
   <div class="flex items-center gap-2 font-semibold">
-    <div class="h-6 w-6 rounded-md bg-zinc-900 flex items-center justify-center">
-      <span class="text-white text-xs font-bold">TA</span>
-    </div>
-    <span>RecruitPro</span>
+    <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Recruitment</small></div>
   </div>
   <button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-zinc-100">
     <i data-lucide="menu" class="h-5 w-5"></i>
@@ -75,20 +72,18 @@
 <aside id="mobileSidebar" class="md:hidden fixed inset-y-0 left-0 w-64 bg-white z-50 transform -translate-x-full transition-transform duration-300 flex flex-col">
   <div class="flex h-14 items-center justify-between px-4">
     <div class="flex items-center gap-2 font-semibold">
-      <div class="h-6 w-6 rounded-md bg-zinc-900 flex items-center justify-center">
-        <span class="text-white text-xs font-bold">TA</span>
-      </div>
-      <span>RecruitPro</span>
+      <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Recruitment</small></div>
     </div>
     <button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-zinc-100">
       <i data-lucide="x" class="h-5 w-5"></i>
     </button>
   </div>
   <div class="flex-1 overflow-auto py-4">
+    <div class="uci-sidebar-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
     <nav class="space-y-1 px-3">
       <% for (String[] item : navItems) {
         boolean isActive = currentPath.equals(item[1]) || currentPath.equals(item[1].replace(ctx, ""));
-        String activeClass = isActive ? "text-zinc-900 bg-zinc-100" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50";
+        String activeClass = isActive ? "text-blue-700 bg-blue-100 shadow-[inset_3px_0_0_#2563eb]" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50";
       %>
       <a href="<%= item[1] %>" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all <%= activeClass %>">
         <i data-lucide="<%= item[2] %>" class="h-4 w-4"></i>
@@ -118,18 +113,16 @@
 <aside class="hidden md:flex w-64 flex-col border-r border-zinc-200/50 bg-white/50 backdrop-blur-xl flex-shrink-0">
   <div class="flex h-14 items-center px-6 pt-2">
     <div class="flex items-center gap-2 font-semibold">
-      <div class="h-6 w-6 rounded-md bg-zinc-900 flex items-center justify-center">
-        <span class="text-white text-xs font-bold">TA</span>
-      </div>
-      <span>RecruitPro</span>
+      <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Recruitment</small></div>
     </div>
   </div>
 
   <div class="flex-1 overflow-auto py-6">
+    <div class="uci-sidebar-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
     <nav class="space-y-1 px-4">
       <% for (String[] item : navItems) {
         boolean isActive = currentPath.equals(item[1]) || currentPath.equals(item[1].replace(ctx, ""));
-        String activeClass = isActive ? "text-zinc-900 bg-zinc-100" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50";
+        String activeClass = isActive ? "text-blue-700 bg-blue-100 shadow-[inset_3px_0_0_#2563eb]" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50";
       %>
       <a href="<%= item[1] %>"
          class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 <%= activeClass %>">

@@ -8,18 +8,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>TA RecruitPro</title>
+  <title>UCI BioSci — TA Recruitment</title>
   <meta name="ctx" content="<%= request.getContextPath() %>">
   <jsp:include page="/common/head.jsp"/>
 </head>
-<body class="bg-[#FAFAFA] text-zinc-900 font-sans selection:bg-zinc-200">
+<body class="bg-zinc-50 text-zinc-900 font-sans selection:bg-zinc-200">
 <div class="flex h-screen w-full">
   <jsp:include page="/common/sidebar.jsp"/>
 
   <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
     <header class="hidden md:flex h-14 items-center justify-between px-6 border-b border-zinc-200/50 bg-white/30 backdrop-blur-md sticky top-0 z-10">
       <div class="flex items-center gap-2 text-sm text-zinc-500">
-        <span>Platform</span>
+        <span>UCI BioSci</span>
         <i data-lucide="chevron-right" class="h-4 w-4"></i>
         <span class="text-zinc-900 font-medium"><%= com.tamo.util.JsonUtil.escapeHtml("organiser".equals(currentSection)||"applicant".equals(currentSection)||"admin".equals(currentSection) ? com.tamo.util.RoleLabels.display(currentSection) : currentSection) %></span>
       </div>

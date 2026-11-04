@@ -1,34 +1,34 @@
-.application-profile { max-width: 58rem; margin: 0 auto; color: #18181b; line-height: 1.6; }
+.application-profile { max-width: 58rem; margin: 0 auto; color: #15345b; line-height: 1.6; }
 .application-profile *, .application-profile *::before, .application-profile *::after { box-sizing: border-box; }
 .application-profile [hidden] { display: none !important; }
 .application-profile h1 { margin: .25rem 0 .5rem; font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 700; line-height: 1.2; }
 .application-profile p { margin: .5rem 0; }
-.application-profile .profile-eyebrow { color: #52525b; font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-.application-profile .profile-note { color: #52525b; font-size: .875rem; }
+.application-profile .profile-eyebrow { color: #405d80; font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.application-profile .profile-note { color: #405d80; font-size: .875rem; }
 .application-profile .profile-nav { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0; }
-.application-profile .profile-nav a { padding: .5rem .75rem; border: 1px solid #d4d4d8; border-radius: .5rem; background: white; font-size: .8125rem; color: #3f3f46; text-decoration: none; }
-.application-profile .profile-nav a:hover { background: #f4f4f5; border-color: #71717a; }
-.application-profile .profile-feedback { padding: .75rem 1rem; border: 1px solid #d4d4d8; border-radius: .75rem; background: #f4f4f5; margin-bottom: 1rem; font-size: .875rem; overflow-wrap: anywhere; }
+.application-profile .profile-nav a { padding: .5rem .75rem; border: 1px solid #b5c9e3; border-radius: .5rem; background: white; font-size: .8125rem; color: #2e4b70; text-decoration: none; }
+.application-profile .profile-nav a:hover { background: #eaf2ff; border-color: #526f93; }
+.application-profile .profile-feedback { padding: .75rem 1rem; border: 1px solid #b5c9e3; border-radius: .75rem; background: #eaf2ff; margin-bottom: 1rem; font-size: .875rem; overflow-wrap: anywhere; }
 .application-profile .profile-feedback[data-state="error"] { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
 .application-profile .profile-feedback[data-state="saved"] { background: #f0fdf4; border-color: #86efac; color: #166534; }
-.application-profile .profile-required-note { font-size: .8125rem; color: #52525b; }
+.application-profile .profile-required-note { font-size: .8125rem; color: #405d80; }
 .application-profile fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
-.application-profile .profile-section { margin: 1rem 0; padding: 1.5rem; background: white; border: 1px solid #e4e4e7; border-radius: .75rem; }
+.application-profile .profile-section { margin: 1rem 0; padding: 1.5rem; background: white; border: 1px solid #d5e3f5; border-radius: .75rem; }
 .application-profile .profile-section h2 { margin: 0 0 .75rem; font-size: 1.125rem; font-weight: 700; line-height: 1.5; scroll-margin-top: 1rem; }
-.application-profile .profile-section h2 > span { display: inline-block; color: #71717a; font-size: .875rem; margin-right: .5rem; }
-.application-profile .profile-section-description { font-size: .875rem; color: #52525b; margin-bottom: 1.25rem; }
+.application-profile .profile-section h2 > span { display: inline-block; color: #526f93; font-size: .875rem; margin-right: .5rem; }
+.application-profile .profile-section-description { font-size: .875rem; color: #405d80; margin-bottom: 1.25rem; }
 .application-profile .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.25rem; }
 .application-profile label { display: block; font-size: .875rem; font-weight: 500; overflow-wrap: anywhere; min-width: 0; }
 .application-profile .profile-section > label, .application-profile .profile-choices { margin-top: 1rem; }
 .application-profile .input { display: block; margin-top: .375rem; min-width: 0; font-family: inherit; }
 .application-profile textarea { resize: vertical; }
-.application-profile small { display: block; font-weight: 400; font-size: .8125rem; color: #52525b; margin-top: .375rem; }
-.application-profile .profile-required, .application-profile .profile-optional { font-size: .75rem; font-weight: 400; color: #52525b; margin-left: .25rem; }
+.application-profile small { display: block; font-weight: 400; font-size: .8125rem; color: #405d80; margin-top: .375rem; }
+.application-profile .profile-required, .application-profile .profile-optional { font-size: .75rem; font-weight: 400; color: #405d80; margin-left: .25rem; }
 .application-profile .profile-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-top: .75rem; }
-.application-profile .profile-choice-grid label, .application-profile .profile-check { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem; border: 1px solid #e4e4e7; border-radius: .5rem; font-weight: 400; }
-.application-profile input[type="checkbox"] { flex: 0 0 auto; width: 1rem; height: 1rem; margin: .2rem 0 0; accent-color: #18181b; }
+.application-profile .profile-choice-grid label, .application-profile .profile-check { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem; border: 1px solid #d5e3f5; border-radius: .5rem; font-weight: 400; }
+.application-profile input[type="checkbox"] { flex: 0 0 auto; width: 1rem; height: 1rem; margin: .2rem 0 0; accent-color: var(--brand-primary, #2563eb); }
 .application-profile .profile-save { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
-.application-profile .profile-save p { font-size: .8125rem; color: #52525b; }
+.application-profile .profile-save p { font-size: .8125rem; color: #405d80; }
 .application-profile .profile-save button { flex-shrink: 0; }
 .application-profile a:not(.profile-nav a) { color: #1d4ed8; text-decoration: underline; text-underline-offset: .15em; }
 .application-profile :is(input, select, textarea, button, a, [tabindex]):focus { outline: 3px solid #2563eb; outline-offset: 3px; }
@@ -47,7 +47,7 @@
 }
 .application-profile .profile-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 .application-profile .profile-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin: 0; }
-.application-profile .profile-details dt { color: #52525b; font-size: .8125rem; margin-bottom: .25rem; }
+.application-profile .profile-details dt { color: #405d80; font-size: .8125rem; margin-bottom: .25rem; }
 .application-profile .profile-details dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .9375rem; }
 @media (max-width: 600px) {
   .application-profile .profile-details { grid-template-columns: minmax(0, 1fr); }

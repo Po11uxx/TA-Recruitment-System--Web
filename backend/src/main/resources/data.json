@@ -72,7 +72,7 @@
       "password": "demo123",
       "phone": "+44 (0)20 7882 5560",
       "role": "organiser",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "avatar": null,
       "status": "active",
       "lastLogin": "2026-05-20T08:45:00",
@@ -85,7 +85,7 @@
       "password": "demo123",
       "phone": "+44 (0)20 7882 5561",
       "role": "organiser",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "avatar": null,
       "status": "active",
       "lastLogin": "2026-05-19T15:30:00",
@@ -98,7 +98,7 @@
       "password": "demo123",
       "phone": "+44 (0)20 7882 5562",
       "role": "organiser",
-      "department": "Electronic Engineering",
+      "department": "Biological Sciences",
       "avatar": null,
       "status": "active",
       "lastLogin": "2026-05-19T11:20:00",
@@ -149,26 +149,26 @@
       ],
       "coursework": [
         {
-          "code": "CS101",
-          "name": "Introduction to Programming",
+          "code": "BIO E109",
+          "name": "Human Physiology",
           "grade": "A",
           "term": "Fall 2024"
         },
         {
-          "code": "CS201",
-          "name": "Data Structures and Algorithms",
+          "code": "BIO 93",
+          "name": "DNA to Organisms",
           "grade": "A",
           "term": "Spring 2025"
         },
         {
-          "code": "CS301",
-          "name": "Database Systems",
+          "code": "BIO 98",
+          "name": "Biochemistry",
           "grade": "A-",
           "term": "Fall 2025"
         },
         {
-          "code": "EBU6304",
-          "name": "Software Engineering",
+          "code": "BIO INF1",
+          "name": "Bioinformatics",
           "grade": "A",
           "term": "Spring 2026"
         }
@@ -176,13 +176,13 @@
       "experience": [
         {
           "role": "Peer Tutor",
-          "course": "CS101",
+          "course": "BIO E109",
           "company": null,
           "term": "Fall 2025",
           "description": "Tutored 15 first-year students in weekly programming workshops."
         },
         {
-          "role": "Software Engineering Intern",
+          "role": "Bioinformatics Intern",
           "course": null,
           "company": "TechCorp Ltd.",
           "term": "Summer 2025",
@@ -224,14 +224,14 @@
       ],
       "coursework": [
         {
-          "code": "CS101",
-          "name": "Introduction to Programming",
+          "code": "BIO E109",
+          "name": "Human Physiology",
           "grade": "A-",
           "term": "Fall 2024"
         },
         {
-          "code": "CS201",
-          "name": "Data Structures and Algorithms",
+          "code": "BIO 93",
+          "name": "DNA to Organisms",
           "grade": "B+",
           "term": "Spring 2025"
         }
@@ -279,8 +279,8 @@
           "term": "Fall 2024"
         },
         {
-          "code": "MATH201",
-          "name": "Linear Algebra",
+          "code": "BIO 94",
+          "name": "From Organisms to Ecosystems",
           "grade": "A",
           "term": "Spring 2025"
         },
@@ -336,14 +336,14 @@
           "term": "Spring 2024"
         },
         {
-          "code": "EE301",
-          "name": "Digital Signal Processing",
+          "code": "BIO 99",
+          "name": "Molecular Biology",
           "grade": "A",
           "term": "Fall 2024"
         },
         {
-          "code": "CS201",
-          "name": "Data Structures and Algorithms",
+          "code": "BIO 93",
+          "name": "DNA to Organisms",
           "grade": "A-",
           "term": "Spring 2025"
         }
@@ -395,8 +395,8 @@
       "skills": [],
       "coursework": [
         {
-          "code": "CS101",
-          "name": "Introduction to Programming",
+          "code": "BIO E109",
+          "name": "Human Physiology",
           "grade": "C",
           "term": "Fall 2024"
         }
@@ -423,14 +423,14 @@
       ],
       "coursework": [
         {
-          "code": "CS301",
-          "name": "Database Systems",
+          "code": "BIO 98",
+          "name": "Biochemistry",
           "grade": "A",
           "term": "Fall 2025"
         },
         {
-          "code": "EBU6304",
-          "name": "Software Engineering",
+          "code": "BIO INF1",
+          "name": "Bioinformatics",
           "grade": "A-",
           "term": "Spring 2026"
         }
@@ -460,9 +460,9 @@
   "modules": [
     {
       "id": "m001",
-      "code": "CS201",
-      "name": "Data Structures and Algorithms",
-      "department": "Computer Science",
+      "code": "BIO 93",
+      "name": "DNA to Organisms",
+      "department": "Biological Sciences",
       "organiserId": "u006",
       "organiserName": "Dr. Alan Turing",
       "term": "Fall 2026",
@@ -470,9 +470,9 @@
     },
     {
       "id": "m002",
-      "code": "CS301",
-      "name": "Database Systems",
-      "department": "Computer Science",
+      "code": "BIO 98",
+      "name": "Biochemistry",
+      "department": "Biological Sciences",
       "organiserId": "u007",
       "organiserName": "Dr. Grace Hopper",
       "term": "Fall 2026",
@@ -480,9 +480,9 @@
     },
     {
       "id": "m003",
-      "code": "CS101",
-      "name": "Introduction to Programming",
-      "department": "Computer Science",
+      "code": "BIO E109",
+      "name": "Human Physiology",
+      "department": "Biological Sciences",
       "organiserId": "u006",
       "organiserName": "Dr. Alan Turing",
       "term": "Fall 2026",
@@ -490,9 +490,9 @@
     },
     {
       "id": "m004",
-      "code": "EBU6304",
-      "name": "Software Engineering",
-      "department": "Computer Science",
+      "code": "BIO INF1",
+      "name": "Bioinformatics",
+      "department": "Biological Sciences",
       "organiserId": "u007",
       "organiserName": "Dr. Grace Hopper",
       "term": "Fall 2026",
@@ -500,9 +500,9 @@
     },
     {
       "id": "m005",
-      "code": "MATH201",
-      "name": "Linear Algebra",
-      "department": "Mathematics",
+      "code": "BIO 94",
+      "name": "From Organisms to Ecosystems",
+      "department": "Biological Sciences",
       "organiserId": "u007",
       "organiserName": "Dr. Grace Hopper",
       "term": "Fall 2026",
@@ -510,9 +510,9 @@
     },
     {
       "id": "m006",
-      "code": "EE301",
-      "name": "Digital Signal Processing",
-      "department": "Electronic Engineering",
+      "code": "BIO 99",
+      "name": "Molecular Biology",
+      "department": "Biological Sciences",
       "organiserId": "u008",
       "organiserName": "Prof. Linus Torvalds",
       "term": "Fall 2026",
@@ -523,30 +523,29 @@
     {
       "id": "j001",
       "moduleId": "m001",
-      "moduleCode": "CS201",
-      "title": "Teaching Assistant - Data Structures and Algorithms",
-      "description": "Support the delivery of CS201 by leading weekly lab sessions, grading programming assignments, and holding office hours to help students master core data structures and algorithm design techniques.",
+      "moduleCode": "BIO 93",
+      "title": "Teaching Assistant - DNA to Organisms",
+      "description": "Support BIO 93 discussions and introductory biology activities covering genetics, cells, and the flow of biological information.",
       "professor": "Dr. Alan Turing",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "type": "Part-time",
       "hoursPerWeek": 10,
       "positions": 3,
       "deadline": "2026-12-15",
       "status": "active",
       "tags": [
-        "Java",
-        "Algorithms",
-        "Teaching"
+        "Genetics",
+        "Lab Tech",
+        "Active Teaching"
       ],
       "requirements": [
-        "Minimum grade of A- in CS201 or equivalent",
-        "Strong proficiency in Java or C++",
-        "Excellent communication skills"
+        "Coursework in introductory biology or equivalent",
+        "Ability to explain genetics and cell biology clearly"
       ],
       "responsibilities": [
-        "Lead one 2-hour lab session per week",
-        "Grade weekly programming assignments within 5 days",
-        "Hold weekly 1-hour office hours"
+        "Lead weekly discussion sessions",
+        "Grade biology assignments",
+        "Hold weekly office hours"
       ],
       "organiserId": "u006",
       "createdAt": "2026-09-01T10:00:00",
@@ -558,29 +557,29 @@
     {
       "id": "j002",
       "moduleId": "m002",
-      "moduleCode": "CS301",
-      "title": "Teaching Assistant - Database Systems",
-      "description": "Help students learn relational design, SQL, and transaction processing. You will mark coursework, run tutorials and support the final group project.",
+      "moduleCode": "BIO 98",
+      "title": "Teaching Assistant - Biochemistry",
+      "description": "Support BIO 98 tutorials on biomolecules, enzymes, metabolism, and interpretation of biochemical experiments.",
       "professor": "Dr. Grace Hopper",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "type": "Part-time",
       "hoursPerWeek": 8,
       "positions": 2,
       "deadline": "2026-12-20",
       "status": "active",
       "tags": [
-        "SQL",
-        "Database",
+        "Biochemistry",
+        "Mass Spectrometry",
         "Teaching"
       ],
       "requirements": [
-        "Grade A in CS301 or equivalent",
-        "Solid SQL and ER-modelling skills"
+        "Coursework in biochemistry or equivalent",
+        "Ability to interpret biochemical data"
       ],
       "responsibilities": [
-        "Grade SQL coursework",
-        "Run a weekly tutorial",
-        "Mentor final-project groups"
+        "Run weekly biochemistry tutorials",
+        "Grade problem sets and lab reports",
+        "Support students during office hours"
       ],
       "organiserId": "u007",
       "createdAt": "2026-09-03T11:00:00",
@@ -592,29 +591,29 @@
     {
       "id": "j003",
       "moduleId": "m003",
-      "moduleCode": "CS101",
-      "title": "Teaching Assistant - Introduction to Programming",
-      "description": "Mentor first-year students taking their first programming course. Patience, clarity, and enthusiasm matter more than advanced expertise.",
+      "moduleCode": "BIO E109",
+      "title": "Teaching Assistant - Human Physiology",
+      "description": "Support BIO E109 students in understanding human physiology through discussion, guided exercises, and laboratory preparation.",
       "professor": "Dr. Alan Turing",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "type": "Part-time",
       "hoursPerWeek": 6,
       "positions": 4,
       "deadline": "2026-12-22",
       "status": "active",
       "tags": [
-        "Python",
-        "Beginners",
-        "Teaching"
+        "Physiology",
+        "Human Anatomy",
+        "Lab Tech"
       ],
       "requirements": [
-        "Minimum grade of A- in CS101",
-        "Strong Python fundamentals"
+        "Coursework in human physiology or equivalent",
+        "Clear communication and safe laboratory practice"
       ],
       "responsibilities": [
-        "Lead beginner-friendly lab sessions",
-        "Mark short weekly exercises",
-        "Provide pastoral support to new students"
+        "Lead physiology discussion sessions",
+        "Help prepare laboratory activities",
+        "Grade exercises and provide feedback"
       ],
       "organiserId": "u006",
       "createdAt": "2026-09-05T09:30:00",
@@ -626,29 +625,31 @@
     {
       "id": "j004",
       "moduleId": "m004",
-      "moduleCode": "EBU6304",
-      "title": "Teaching Assistant - Software Engineering",
-      "description": "Assist the EBU6304 team-project module. Coach groups through requirements engineering, UML modelling, and agile delivery, and assess their deliverables.",
+      "moduleCode": "BIO INF1",
+      "title": "Teaching Assistant - Bioinformatics",
+      "description": "Support the BIO INF1 demo course with practical analysis of biological data using Python, R, and Linux.",
       "professor": "Dr. Grace Hopper",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "type": "Part-time",
       "hoursPerWeek": 8,
       "positions": 2,
       "deadline": "2026-12-30",
       "status": "active",
       "tags": [
-        "Agile",
-        "UML",
-        "Project"
+        "Python",
+        "R",
+        "Linux",
+        "Git",
+        "Slurm"
       ],
       "requirements": [
-        "Grade A in EBU6304",
-        "Experience with Git, code review and CI/CD"
+        "Experience analysing biological datasets",
+        "Working knowledge of Python or R and Linux"
       ],
       "responsibilities": [
-        "Mentor 3 group projects per week",
-        "Grade UML and report deliverables",
-        "Hold weekly office hours"
+        "Guide bioinformatics practical sessions",
+        "Review analysis notebooks",
+        "Help students interpret results"
       ],
       "organiserId": "u007",
       "createdAt": "2026-09-08T13:00:00",
@@ -660,29 +661,29 @@
     {
       "id": "j005",
       "moduleId": "m006",
-      "moduleCode": "EE301",
-      "title": "Teaching Assistant - Digital Signal Processing",
-      "description": "Support EE301 lab work in MATLAB and Python. Help students implement and debug DSP algorithms, and contribute to lab manual improvements.",
+      "moduleCode": "BIO 99",
+      "title": "Teaching Assistant - Molecular Biology",
+      "description": "Support BIO 99 tutorials on nucleic acids, gene expression, and molecular biology methods.",
       "professor": "Prof. Linus Torvalds",
-      "department": "Electronic Engineering",
+      "department": "Biological Sciences",
       "type": "Part-time",
       "hoursPerWeek": 8,
       "positions": 1,
       "deadline": "2026-12-25",
       "status": "active",
       "tags": [
-        "MATLAB",
-        "Python",
-        "DSP"
+        "Molecular Biology",
+        "Genetics",
+        "Lab Tech"
       ],
       "requirements": [
-        "Grade A in EE301",
-        "Strong MATLAB and Python skills"
+        "Coursework in molecular biology or equivalent",
+        "Ability to explain gene expression and experimental methods"
       ],
       "responsibilities": [
-        "Run weekly MATLAB labs",
-        "Grade lab reports",
-        "Improve lab manuals"
+        "Run molecular biology tutorials",
+        "Grade laboratory reports",
+        "Support students during office hours"
       ],
       "organiserId": "u008",
       "createdAt": "2026-09-10T14:00:00",
@@ -694,24 +695,25 @@
     {
       "id": "j006",
       "moduleId": "m001",
-      "moduleCode": "CS201",
-      "title": "Lab Assistant - Data Structures (Summer)",
-      "description": "Summer-term lab support for resit students. Position is now closed but is retained for historical reference.",
+      "moduleCode": "BIO 93",
+      "title": "Lab Assistant - DNA to Organisms (Summer)",
+      "description": "Summer-term BIO 93 discussion support. This closed demonstration posting is retained for historical workflow examples.",
       "professor": "Dr. Alan Turing",
-      "department": "Computer Science",
+      "department": "Biological Sciences",
       "type": "Part-time",
       "hoursPerWeek": 5,
       "positions": 1,
       "deadline": "2026-06-30",
       "status": "closed",
       "tags": [
-        "Java"
+        "Genetics",
+        "Teaching"
       ],
       "requirements": [
-        "Grade B+ in CS201"
+        "Coursework in introductory biology or equivalent"
       ],
       "responsibilities": [
-        "Supervise summer lab sessions"
+        "Supervise summer biology study sessions"
       ],
       "organiserId": "u006",
       "createdAt": "2026-05-01T09:00:00",
@@ -727,14 +729,14 @@
       "jobId": "j001",
       "applicantId": "u001",
       "status": "applied",
-      "coverLetter": "Dear Dr. Turing, I am writing to express my strong interest in the Teaching Assistant role for CS201. As a third-year Computer Science student who earned an A in CS201 last spring, I am confident I can help students master data structures and algorithm design. I have prior tutoring experience and have built a small open-source data structures library in Java. Yours sincerely, Alex Johnson.",
+      "coverLetter": "I would like to apply for the BIO 93 teaching assistant position. I am interested in supporting students in DNA to Organisms through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Alex Johnson.",
       "documentIds": [
         "doc001",
         "doc002"
       ],
       "matchScore": 95,
       "riskFlag": null,
-      "aiSummary": "Excellent fit: A in CS201, prior peer tutoring, strong Java background.",
+      "aiSummary": "Legacy demo note: BIO 93 coursework grade A. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-09-18T10:15:00",
       "updatedAt": "2026-09-18T10:15:00",
       "timeline": [
@@ -780,13 +782,13 @@
       "jobId": "j001",
       "applicantId": "u002",
       "status": "review",
-      "coverLetter": "Dear Dr. Turing, I would love to assist with CS201. Although my grade was B+, I have invested significant time outside class building data structures in Python and Java and I am eager to learn from you. Best regards, Bob Smith.",
+      "coverLetter": "I would like to apply for the BIO 93 teaching assistant position. I am interested in supporting students in DNA to Organisms through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Bob Smith.",
       "documentIds": [
         "doc003"
       ],
       "matchScore": 72,
       "riskFlag": null,
-      "aiSummary": "Solid foundation but grade slightly below the typical bar.",
+      "aiSummary": "Legacy demo note: BIO 93 coursework grade B+. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-09-20T14:30:00",
       "updatedAt": "2026-09-22T09:00:00",
       "timeline": [
@@ -832,13 +834,13 @@
       "jobId": "j001",
       "applicantId": "u010",
       "status": "shortlisted",
-      "coverLetter": "Dear Dr. Turing, as an MSc Computer Science student with a strong background in algorithms and software engineering, I would be glad to help support CS201. I previously TA\u0027d a data-structures bootcamp at my undergraduate university. Kind regards, Sarah Lee.",
+      "coverLetter": "I would like to apply for the BIO 93 teaching assistant position. I am interested in supporting students in DNA to Organisms through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Sarah Lee.",
       "documentIds": [
         "doc007"
       ],
       "matchScore": 88,
       "riskFlag": "overload",
-      "aiSummary": "Strong MSc candidate but already at 18/20 weekly hours.",
+      "aiSummary": "Legacy demo note: no BIO 93 coursework entry in this sample profile; manual review required.",
       "appliedAt": "2026-09-21T11:00:00",
       "updatedAt": "2026-09-28T16:00:00",
       "timeline": [
@@ -884,14 +886,14 @@
       "jobId": "j001",
       "applicantId": "u004",
       "status": "interview",
-      "coverLetter": "Dear Dr. Turing, I am a final-year EE student who took CS201 as an elective and earned an A-. I have demonstrator experience for EE201 and I would value the chance to broaden my teaching experience into the CS department. Best, Diana Chen.",
+      "coverLetter": "I would like to apply for the BIO 93 teaching assistant position. I am interested in supporting students in DNA to Organisms through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Diana Chen.",
       "documentIds": [
         "doc005",
         "doc006"
       ],
       "matchScore": 90,
       "riskFlag": null,
-      "aiSummary": "Cross-department candidate with strong CS grade and prior teaching experience.",
+      "aiSummary": "Legacy demo note: BIO 93 coursework grade A-. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-09-22T08:45:00",
       "updatedAt": "2026-10-08T14:00:00",
       "timeline": [
@@ -937,13 +939,13 @@
       "jobId": "j001",
       "applicantId": "u003",
       "status": "offer",
-      "coverLetter": "Dear Dr. Turing, I am applying for the CS201 TA position. While my home department is Mathematics, I have taken three CS modules as electives and achieved strong results. I love explaining mathematical foundations of algorithms. Thank you for considering me. Best, Carol White.",
+      "coverLetter": "I would like to apply for the BIO 93 teaching assistant position. I am interested in supporting students in DNA to Organisms through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Carol White.",
       "documentIds": [
         "doc004"
       ],
       "matchScore": 84,
       "riskFlag": null,
-      "aiSummary": "Strong mathematical foundation; particularly suited to algorithm proofs.",
+      "aiSummary": "Legacy demo note: no BIO 93 coursework entry in this sample profile; manual review required.",
       "appliedAt": "2026-09-19T16:20:00",
       "updatedAt": "2026-10-12T10:30:00",
       "timeline": [
@@ -989,11 +991,11 @@
       "jobId": "j001",
       "applicantId": "u005",
       "status": "rejected",
-      "coverLetter": "I would like to apply for the CS201 TA role. Regards, Edward.",
+      "coverLetter": "I would like to apply for the BIO 93 teaching assistant position. I am interested in supporting students in DNA to Organisms through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Edward Park.",
       "documentIds": [],
       "matchScore": 35,
       "riskFlag": "missing_req",
-      "aiSummary": "Does not meet minimum grade requirement (C in CS101, no CS201 record).",
+      "aiSummary": "Legacy demo note: no BIO 93 coursework entry in this sample profile; manual review required.",
       "appliedAt": "2026-09-25T12:00:00",
       "updatedAt": "2026-10-01T09:00:00",
       "timeline": [
@@ -1025,13 +1027,13 @@
       "jobId": "j002",
       "applicantId": "u001",
       "status": "offer",
-      "coverLetter": "Dear Dr. Hopper, I would be delighted to support CS301. I achieved an A- in your module last semester and have worked extensively with PostgreSQL and MongoDB in side projects. Thank you, Alex Johnson.",
+      "coverLetter": "I would like to apply for the BIO 98 teaching assistant position. I am interested in supporting students in Biochemistry through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Alex Johnson.",
       "documentIds": [
         "doc001"
       ],
       "matchScore": 89,
       "riskFlag": "overload",
-      "aiSummary": "Strong CS301 result; first of three confirmed offers contributing to weekly overload.",
+      "aiSummary": "Legacy demo note: BIO 98 coursework grade A-. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-09-25T09:30:00",
       "updatedAt": "2026-10-15T11:00:00",
       "timeline": [
@@ -1077,13 +1079,13 @@
       "jobId": "j003",
       "applicantId": "u002",
       "status": "applied",
-      "coverLetter": "Dear Dr. Turing, I\u0027d love to TA for CS101. I remember how intimidating my first programming module was and I want to make it easier for the new cohort. Best, Bob Smith.",
+      "coverLetter": "I would like to apply for the BIO E109 teaching assistant position. I am interested in supporting students in Human Physiology through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Bob Smith.",
       "documentIds": [
         "doc003"
       ],
       "matchScore": 78,
       "riskFlag": null,
-      "aiSummary": "Good rapport potential with first-year students.",
+      "aiSummary": "Legacy demo note: BIO E109 coursework grade A-. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-09-30T10:00:00",
       "updatedAt": "2026-09-30T10:00:00",
       "timeline": [
@@ -1129,13 +1131,13 @@
       "jobId": "j004",
       "applicantId": "u010",
       "status": "review",
-      "coverLetter": "Dear Dr. Hopper, I am writing to apply for the EBU6304 TA role. My MSc team project used Scrum, GitHub Actions and pair-programming, and I would love to share those practices with undergraduate teams. Sincerely, Sarah Lee.",
+      "coverLetter": "I would like to apply for the BIO INF1 teaching assistant position. I am interested in supporting students in Bioinformatics through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Sarah Lee.",
       "documentIds": [
         "doc007"
       ],
       "matchScore": 86,
       "riskFlag": null,
-      "aiSummary": "MSc candidate with real-world agile and CI/CD exposure.",
+      "aiSummary": "Legacy demo note: BIO INF1 coursework grade A-. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-10-02T13:00:00",
       "updatedAt": "2026-10-05T15:00:00",
       "timeline": [
@@ -1181,13 +1183,13 @@
       "jobId": "j005",
       "applicantId": "u004",
       "status": "shortlisted",
-      "coverLetter": "Dear Prof. Torvalds, I scored an A in EE301 and I have continued working on DSP through my research assistantship. I would be honoured to support next year\u0027s cohort. Best, Diana Chen.",
+      "coverLetter": "I would like to apply for the BIO 99 teaching assistant position. I am interested in supporting students in Molecular Biology through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Diana Chen.",
       "documentIds": [
         "doc005"
       ],
       "matchScore": 96,
       "riskFlag": null,
-      "aiSummary": "Outstanding EE301 grade; ongoing DSP research.",
+      "aiSummary": "Legacy demo note: BIO 99 coursework grade A. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-10-04T09:00:00",
       "updatedAt": "2026-10-12T11:00:00",
       "timeline": [
@@ -1233,13 +1235,13 @@
       "jobId": "j003",
       "applicantId": "u001",
       "status": "offer",
-      "coverLetter": "Dear Dr. Turing, I would be happy to support CS101 as a TA. I tutored introductory programming last year and enjoy helping first-year students build confidence. Best regards, Alex Johnson.",
+      "coverLetter": "I would like to apply for the BIO E109 teaching assistant position. I am interested in supporting students in Human Physiology through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Alex Johnson.",
       "documentIds": [
         "doc001"
       ],
       "matchScore": 91,
       "riskFlag": "overload",
-      "aiSummary": "Strong CS101 fit, but combined with existing offers this pushes weekly hours above the 20-hour cap.",
+      "aiSummary": "Legacy demo note: BIO E109 coursework grade A. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-10-01T09:00:00",
       "updatedAt": "2026-10-18T14:00:00",
       "timeline": [
@@ -1285,14 +1287,14 @@
       "jobId": "j004",
       "applicantId": "u001",
       "status": "offer",
-      "coverLetter": "Dear Dr. Hopper, I am pleased to accept the EBU6304 TA offer. My group project experience aligns well with mentoring agile teams. Thank you, Alex Johnson.",
+      "coverLetter": "I would like to apply for the BIO INF1 teaching assistant position. I am interested in supporting students in Bioinformatics through discussion sessions, coursework feedback, and office hours. My submitted profile includes my coursework and experience. Thank you for considering my application. Alex Johnson.",
       "documentIds": [
         "doc001",
         "doc002"
       ],
       "matchScore": 93,
       "riskFlag": "overload",
-      "aiSummary": "Excellent SE background; third confirmed offer increases overload risk.",
+      "aiSummary": "Legacy demo note: BIO INF1 coursework grade A. Review submitted qualifications and availability before a decision.",
       "appliedAt": "2026-10-06T11:30:00",
       "updatedAt": "2026-10-20T09:00:00",
       "timeline": [
@@ -1340,8 +1342,8 @@
       "applicationId": "a004",
       "candidateId": "u004",
       "candidateName": "Diana Chen",
-      "moduleCode": "CS201",
-      "moduleName": "Data Structures and Algorithms",
+      "moduleCode": "BIO 93",
+      "moduleName": "DNA to Organisms",
       "date": "2026-12-05",
       "startTime": "10:00",
       "endTime": "10:30",
@@ -1356,8 +1358,8 @@
       "applicationId": "a005",
       "candidateId": "u003",
       "candidateName": "Carol White",
-      "moduleCode": "CS201",
-      "moduleName": "Data Structures and Algorithms",
+      "moduleCode": "BIO 93",
+      "moduleName": "DNA to Organisms",
       "date": "2026-10-06",
       "startTime": "14:00",
       "endTime": "14:45",
@@ -1372,8 +1374,8 @@
       "applicationId": "a007",
       "candidateId": "u001",
       "candidateName": "Alex Johnson",
-      "moduleCode": "CS301",
-      "moduleName": "Database Systems",
+      "moduleCode": "BIO 98",
+      "moduleName": "Biochemistry",
       "date": "2026-10-10",
       "startTime": "11:00",
       "endTime": "11:30",
@@ -1388,8 +1390,8 @@
       "applicationId": "a010",
       "candidateId": "u004",
       "candidateName": "Diana Chen",
-      "moduleCode": "EE301",
-      "moduleName": "Digital Signal Processing",
+      "moduleCode": "BIO 99",
+      "moduleName": "Molecular Biology",
       "date": "2026-12-08",
       "startTime": "09:30",
       "endTime": "10:15",
@@ -1406,7 +1408,7 @@
       "userId": "u001",
       "type": "offer",
       "title": "Offer Received!",
-      "message": "Congratulations! You have received an offer for CS301 Teaching Assistant.",
+      "message": "Congratulations! You have received an offer for BIO 98 Teaching Assistant.",
       "relatedId": "a007",
       "createdAt": "2026-10-15T11:00:00",
       "read": false
@@ -1416,7 +1418,7 @@
       "userId": "u001",
       "type": "status_change",
       "title": "Application Submitted",
-      "message": "Your application for CS201 Teaching Assistant has been received and is awaiting review.",
+      "message": "Your application for BIO 93 Teaching Assistant has been received and is awaiting review.",
       "relatedId": "a001",
       "createdAt": "2026-09-18T10:15:00",
       "read": true
@@ -1426,7 +1428,7 @@
       "userId": "u003",
       "type": "offer",
       "title": "Offer Received!",
-      "message": "Congratulations! You have received an offer for CS201 Teaching Assistant.",
+      "message": "Congratulations! You have received an offer for BIO 93 Teaching Assistant.",
       "relatedId": "a005",
       "createdAt": "2026-10-12T10:30:00",
       "read": false
@@ -1435,8 +1437,8 @@
       "id": "n004",
       "userId": "u004",
       "type": "interview_scheduled",
-      "title": "Interview Scheduled: CS201",
-      "message": "Your interview for CS201 Teaching Assistant is scheduled on 2026-12-05 at 10:00. Type: Video Call.",
+      "title": "Interview Scheduled: BIO 93",
+      "message": "Your interview for BIO 93 Teaching Assistant is scheduled on 2026-12-05 at 10:00. Type: Video Call.",
       "relatedId": "i001",
       "createdAt": "2026-10-08T14:00:00",
       "read": false
@@ -1445,8 +1447,8 @@
       "id": "n005",
       "userId": "u004",
       "type": "interview_scheduled",
-      "title": "Interview Scheduled: EE301",
-      "message": "Your interview for EE301 Teaching Assistant is scheduled on 2026-12-08 at 09:30. Type: In-Person at Electronic Engineering Building, Room 2.10.",
+      "title": "Interview Scheduled: BIO 99",
+      "message": "Your interview for BIO 99 Teaching Assistant is scheduled on 2026-12-08 at 09:30. Type: In-Person at Electronic Engineering Building, Room 2.10.",
       "relatedId": "i004",
       "createdAt": "2026-10-12T11:00:00",
       "read": false
@@ -1455,8 +1457,8 @@
       "id": "n006",
       "userId": "u010",
       "type": "status_change",
-      "title": "You\u0027ve Been Shortlisted!",
-      "message": "Congratulations! Your application for CS201 Teaching Assistant has been shortlisted.",
+      "title": "You've Been Shortlisted!",
+      "message": "Congratulations! Your application for BIO 93 Teaching Assistant has been shortlisted.",
       "relatedId": "a003",
       "createdAt": "2026-09-28T16:00:00",
       "read": false
@@ -1466,7 +1468,7 @@
       "userId": "u002",
       "type": "status_change",
       "title": "Application Under Review",
-      "message": "Your application for CS201 Teaching Assistant is now being reviewed.",
+      "message": "Your application for BIO 93 Teaching Assistant is now being reviewed.",
       "relatedId": "a002",
       "createdAt": "2026-09-22T09:00:00",
       "read": true
@@ -1476,7 +1478,7 @@
       "userId": "u005",
       "type": "rejection",
       "title": "Application Update",
-      "message": "We regret to inform you that your application for CS201 Teaching Assistant was not successful on this occasion.",
+      "message": "We regret to inform you that your application for BIO 93 Teaching Assistant was not successful on this occasion.",
       "relatedId": "a006",
       "createdAt": "2026-10-01T09:00:00",
       "read": true
@@ -1486,7 +1488,7 @@
       "userId": "u001",
       "type": "offer",
       "title": "Offer Received!",
-      "message": "Congratulations! You have received an offer for CS101 Introduction to Programming TA.",
+      "message": "Congratulations! You have received an offer for BIO E109 Human Physiology TA.",
       "relatedId": "a011",
       "createdAt": "2026-10-18T14:00:00",
       "read": false
@@ -1496,7 +1498,7 @@
       "userId": "u001",
       "type": "offer",
       "title": "Offer Received!",
-      "message": "Congratulations! You have received an offer for EBU6304 Software Engineering TA.",
+      "message": "Congratulations! You have received an offer for BIO INF1 Bioinformatics TA.",
       "relatedId": "a012",
       "createdAt": "2026-10-20T09:00:00",
       "read": false
@@ -1528,26 +1530,8 @@
   "departments": [
     {
       "id": "d001",
-      "name": "Computer Science",
-      "moduleCount": 4,
-      "status": "active"
-    },
-    {
-      "id": "d002",
-      "name": "Mathematics",
-      "moduleCount": 1,
-      "status": "active"
-    },
-    {
-      "id": "d003",
-      "name": "Electronic Engineering",
-      "moduleCount": 1,
-      "status": "active"
-    },
-    {
-      "id": "d004",
-      "name": "Physics",
-      "moduleCount": 0,
+      "name": "Biological Sciences",
+      "moduleCount": 6,
       "status": "active"
     }
   ],
@@ -1649,7 +1633,7 @@
       "actor": "Dr. Grace Hopper",
       "actorId": "u007",
       "type": "info",
-      "details": "Application a007 moved to offer for CS301 Teaching Assistant.",
+      "details": "Application a007 moved to offer for BIO 98 Teaching Assistant.",
       "ip": "192.168.1.11"
     },
     {
@@ -1669,7 +1653,7 @@
       "actor": "Prof. Linus Torvalds",
       "actorId": "u008",
       "type": "info",
-      "details": "Scheduled interview i004 for application a010 (EE301).",
+      "details": "Scheduled interview i004 for application a010 (BIO 99).",
       "ip": "192.168.1.12"
     },
     {
@@ -1689,7 +1673,7 @@
       "actor": "Dr. Alan Turing",
       "actorId": "u006",
       "type": "warning",
-      "details": "Application a011 offer extended to Alex Johnson (CS101). Weekly hours now exceed cap.",
+      "details": "Application a011 offer extended to Alex Johnson (BIO E109). Weekly hours now exceed cap.",
       "ip": "192.168.1.10"
     },
     {
@@ -1699,7 +1683,7 @@
       "actor": "Dr. Grace Hopper",
       "actorId": "u007",
       "type": "warning",
-      "details": "Application a012 offer extended to Alex Johnson (EBU6304). Total workload: 22/20 hrs.",
+      "details": "Application a012 offer extended to Alex Johnson (BIO INF1). Total workload: 22/20 hrs.",
       "ip": "192.168.1.11"
     },
     {
@@ -1719,7 +1703,7 @@
       "actor": "Dr. Alan Turing",
       "actorId": "u006",
       "type": "info",
-      "details": "Scheduled interview i001 for application a004 (CS201).",
+      "details": "Scheduled interview i001 for application a004 (BIO 93).",
       "ip": "192.168.1.10"
     },
     {
@@ -1739,7 +1723,7 @@
       "actor": "Bob Smith",
       "actorId": "u002",
       "type": "info",
-      "details": "Applied for job j003 (CS101 TA).",
+      "details": "Applied for job j003 (BIO E109 TA).",
       "ip": "192.168.1.21"
     },
     {
@@ -1749,7 +1733,7 @@
       "actor": "Alex Johnson",
       "actorId": "u001",
       "type": "info",
-      "details": "Applied for job j002 (CS301 TA).",
+      "details": "Applied for job j002 (BIO 98 TA).",
       "ip": "192.168.1.20"
     },
     {
@@ -1759,7 +1743,7 @@
       "actor": "Alex Johnson",
       "actorId": "u001",
       "type": "info",
-      "details": "Applied for job j001 (CS201 TA).",
+      "details": "Applied for job j001 (BIO 93 TA).",
       "ip": "192.168.1.20"
     },
     {
@@ -1769,7 +1753,7 @@
       "actor": "Prof. Linus Torvalds",
       "actorId": "u008",
       "type": "success",
-      "details": "Posted new job: Teaching Assistant - Digital Signal Processing.",
+      "details": "Posted new job: Teaching Assistant - Molecular Biology.",
       "ip": "192.168.1.12"
     },
     {
@@ -1779,7 +1763,7 @@
       "actor": "Dr. Grace Hopper",
       "actorId": "u007",
       "type": "success",
-      "details": "Posted new job: Teaching Assistant - Software Engineering.",
+      "details": "Posted new job: Teaching Assistant - Bioinformatics.",
       "ip": "192.168.1.11"
     },
     {
@@ -1789,7 +1773,7 @@
       "actor": "Dr. Alan Turing",
       "actorId": "u006",
       "type": "success",
-      "details": "Posted new job: Teaching Assistant - Data Structures and Algorithms.",
+      "details": "Posted new job: Teaching Assistant - DNA to Organisms.",
       "ip": "192.168.1.10"
     },
     {
@@ -1937,7 +1921,7 @@
     {
       "id": "w001",
       "taUserId": "u001",
-      "moduleCode": "CS301",
+      "moduleCode": "BIO 98",
       "hoursPerWeek": 8,
       "term": "Fall 2026",
       "status": "active"
@@ -1945,7 +1929,7 @@
     {
       "id": "w002",
       "taUserId": "u001",
-      "moduleCode": "CS101",
+      "moduleCode": "BIO E109",
       "hoursPerWeek": 6,
       "term": "Fall 2026",
       "status": "active"
@@ -1953,7 +1937,7 @@
     {
       "id": "w007",
       "taUserId": "u001",
-      "moduleCode": "EBU6304",
+      "moduleCode": "BIO INF1",
       "hoursPerWeek": 8,
       "term": "Fall 2026",
       "status": "active"
@@ -1961,7 +1945,7 @@
     {
       "id": "w003",
       "taUserId": "u002",
-      "moduleCode": "CS101",
+      "moduleCode": "BIO E109",
       "hoursPerWeek": 8,
       "term": "Fall 2026",
       "status": "active"
@@ -1969,7 +1953,7 @@
     {
       "id": "w004",
       "taUserId": "u010",
-      "moduleCode": "CS301",
+      "moduleCode": "BIO 98",
       "hoursPerWeek": 12,
       "term": "Fall 2026",
       "status": "active"
@@ -1977,7 +1961,7 @@
     {
       "id": "w005",
       "taUserId": "u010",
-      "moduleCode": "EBU6304",
+      "moduleCode": "BIO INF1",
       "hoursPerWeek": 6,
       "term": "Fall 2026",
       "status": "active"
@@ -1985,7 +1969,7 @@
     {
       "id": "w006",
       "taUserId": "u004",
-      "moduleCode": "EE301",
+      "moduleCode": "BIO 99",
       "hoursPerWeek": 0,
       "term": "Fall 2026",
       "status": "pending"
@@ -1997,7 +1981,7 @@
       "conversationId": "u001_u006",
       "senderId": "u001",
       "receiverId": "u006",
-      "content": "Hello Dr. Turing, I just submitted my application for the CS201 TA position. Could you let me know roughly when shortlisting decisions will be made? Thanks, Alex.",
+      "content": "Hello Dr. Turing, I just submitted my application for the BIO 93 TA position. Could you let me know roughly when shortlisting decisions will be made? Thanks, Alex.",
       "timestamp": "2026-09-18T10:30:00",
       "read": true,
       "replyToId": null,
@@ -2031,7 +2015,7 @@
       "conversationId": "u003_u006",
       "senderId": "u006",
       "receiverId": "u003",
-      "content": "Hi Carol, congratulations on the offer for CS201 TA. Please reply to this message with your acceptance before Friday and we will get the paperwork started. Best, Alan.",
+      "content": "Hi Carol, congratulations on the offer for BIO 93 TA. Please reply to this message with your acceptance before Friday and we will get the paperwork started. Best, Alan.",
       "timestamp": "2026-10-12T10:35:00",
       "read": true,
       "replyToId": null,
@@ -2065,7 +2049,7 @@
       "conversationId": "u004_u008",
       "senderId": "u008",
       "receiverId": "u004",
-      "content": "Hi Diana, your EE301 TA interview is confirmed for 8 December at 09:30 in EE Building Room 2.10. Please come 5 minutes early. Best, Linus.",
+      "content": "Hi Diana, your BIO 99 TA interview is confirmed for 8 December at 09:30 in EE Building Room 2.10. Please come 5 minutes early. Best, Linus.",
       "timestamp": "2026-10-12T11:05:00",
       "read": false,
       "replyToId": null,

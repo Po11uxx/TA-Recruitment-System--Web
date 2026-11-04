@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Create Account - TA RecruitPro</title>
+  <title>Create Account - UCI BioSci — TA Recruitment</title>
   <meta name="ctx" content="<%= request.getContextPath() %>">
   <jsp:include page="/common/head.jsp"/>
 </head>
@@ -12,22 +12,20 @@
   %>
   
   <!-- Top Dark Header Section -->
-  <div class="relative bg-zinc-950 text-white pt-8 pb-32 px-8 flex flex-col justify-between dynamic-bg overflow-hidden">
+  <div class="relative bg-zinc-950 text-white pt-8 pb-32 px-4 sm:px-8 flex flex-col justify-between dynamic-bg overflow-hidden">
     <canvas id="auth-canvas" class="absolute inset-0 z-0 opacity-50"></canvas>
     <!-- Back to home nav -->
     <div class="flex items-center justify-between w-full max-w-5xl mx-auto relative z-10">
       <a href="<%= ctx %>/index.jsp" class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group">
         <i data-lucide="arrow-left" class="h-5 w-5 group-hover:-translate-x-1 transition-transform"></i>
-        <span class="font-medium text-base">Back to Home</span>
+        <span class="font-medium text-sm sm:text-base"><span class="sm:hidden">Home</span><span class="hidden sm:inline">Back to Home</span></span>
       </a>
-      <div class="text-sm font-semibold tracking-widest text-zinc-500 uppercase">
-        / Sign Up
-      </div>
+      <div class="uci-auth-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
     </div>
     
     <!-- Title Area -->
     <div class="w-full max-w-5xl mx-auto mt-16 slide-up-element">
-      <div class="text-zinc-400 font-medium tracking-wide mb-3 text-lg">Join the platform</div>
+      <div class="text-zinc-400 font-medium tracking-wide mb-3 text-lg">Join UCI BioSci</div>
       <h1 class="text-6xl md:text-8xl font-black tracking-tighter h-[96px] flex flex-col justify-end">
         <span id="typewriter-text" class="text-white"></span>
       </h1>
@@ -72,7 +70,7 @@
 
             <!-- Buttons -->
             <div class="pt-4 space-y-4">
-              <button type="submit" id="submitBtn" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-xl shadow-zinc-900/20 hover:shadow-zinc-900/30 flex justify-center items-center gap-2 group">
+              <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30 flex justify-center items-center gap-2 group">
                 Create Account
                 <i data-lucide="arrow-right" class="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors"></i>
               </button>
@@ -84,13 +82,13 @@
           </form>
         </div>
 
-        <!-- Right Side: Animated Cat -->
+        <!-- Right Side: Interactive Anteater -->
         <div class="w-full md:w-1/2 flex flex-col items-center justify-center relative">
-          <!-- Subtle decorative background for cat -->
+          <!-- Subtle decorative background for the anteater -->
           <div class="absolute inset-0 bg-gradient-to-tr from-indigo-50 to-purple-50 rounded-[3rem] -z-10 blur-3xl opacity-50"></div>
           
           <div id="signup-cat-container" class="cat-container w-full max-w-[300px] aspect-square flex items-center justify-center relative z-10">
-            <!-- Cat SVG will be injected here by JS -->
+            <!-- Interactive anteater is rendered locally by JavaScript -->
           </div>
           <p class="text-zinc-400 font-medium text-sm mt-8 text-center">We'll keep a close eye on your data.</p>
         </div>
@@ -108,11 +106,10 @@
   <script src="<%= ctx %>/static/js/particles.js"></script>
   <script src="<%= ctx %>/static/js/typewriter.js"></script>
   <script src="<%= ctx %>/static/js/stitch-matrix.js?v=<%= System.currentTimeMillis() %>"></script>
-  <script src="https://unpkg.com/@rive-app/canvas@2.7.0"></script>
-  <script src="<%= ctx %>/static/js/rive-anim.js?v=<%= System.currentTimeMillis() %>"></script>
+  <script src="<%= ctx %>/static/js/anteater-anim.js?v=<%= System.currentTimeMillis() %>"></script>
   <script>
     lucide.createIcons();
-    let riveAnim = null;
+    let mascotAnim = null;
     
     // Initialize interactive particles and typewriter
     window.addEventListener('DOMContentLoaded', () => {
@@ -123,8 +120,8 @@
         window.initStitchMatrix('signup-stitch-matrix', { avoidSelector: '.apple-input, .segmented-control, button, a' });
       }
       if(window.initSimpleTypewriter) window.initSimpleTypewriter('typewriter-text', ["Create account.", "Join us.", "Get started."]);
-      if(window.initRiveLogin) {
-        riveAnim = window.initRiveLogin('signup-cat-container', '<%= ctx %>');
+      if(window.initLoginAnteater) {
+        mascotAnim = window.initLoginAnteater('signup-cat-container', '<%= ctx %>');
       }
     });
 
@@ -153,12 +150,12 @@
 
       try {
         await authApi.signup(name, email, pwd, selectedRole);
-        if(riveAnim) riveAnim.triggerSuccess();
+        if(mascotAnim) mascotAnim.triggerSuccess();
         setTimeout(() => {
           window.location.href = ctx + '/' + selectedRole + '/dashboard.jsp';
         }, 1000);
       } catch (err) {
-        if(riveAnim) riveAnim.triggerFail();
+        if(mascotAnim) mascotAnim.triggerFail();
         errDiv.textContent = err.message || 'Registration failed.';
         errDiv.classList.remove('hidden');
         submitBtn.innerHTML = originalText;

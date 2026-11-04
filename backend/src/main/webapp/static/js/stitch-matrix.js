@@ -141,11 +141,11 @@ class StitchMatrix {
         finalAlpha *= attenuation; // Dim opacity behind text
         
         // Color Interpolation:
-        // Base color: Zinc-950 (rgb(24, 24, 27))
-        // Highlight color: Indigo-500 (rgb(99, 102, 241))
-        const rVal = Math.round(24 + (99 - 24) * mouseInfluence);
-        const gVal = Math.round(24 + (102 - 24) * mouseInfluence);
-        const bVal = Math.round(27 + (241 - 27) * mouseInfluence);
+        // Base color: deep blue (rgb(21, 52, 91))
+        // Highlight color: blue-500 (rgb(59, 130, 246))
+        const rVal = Math.round(21 + (59 - 21) * mouseInfluence);
+        const gVal = Math.round(52 + (130 - 52) * mouseInfluence);
+        const bVal = Math.round(91 + (246 - 91) * mouseInfluence);
         
         // --- 4. Draw ---
         this.ctx.fillStyle = `rgba(${rVal}, ${gVal}, ${bVal}, ${finalAlpha})`;

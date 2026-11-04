@@ -5,10 +5,24 @@
 <script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/custom.css?v=<%= System.currentTimeMillis() %>">
 <script>
+// Shared brand palette for public pages and every authenticated workspace.
+const brandBlue = {
+  50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+  400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+  800: '#1e40af', 900: '#1e3a8a', 950: '#0b1f4a'
+};
 tailwind.config = {
   theme: {
     extend: {
-      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      colors: {
+        zinc: {
+          50: '#f4f8ff', 100: '#eaf2ff', 200: '#d5e3f5', 300: '#b5c9e3',
+          400: '#7c9bbf', 500: '#526f93', 600: '#405d80', 700: '#2e4b70',
+          800: '#1c3d68', 900: '#15345b', 950: '#0b1f4a'
+        },
+        indigo: brandBlue, violet: brandBlue, purple: brandBlue
+      }
     }
   }
 }

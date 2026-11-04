@@ -79,8 +79,8 @@
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false }, ticks: { color: '#71717a', font: { size: 12 } } },
-          y: { grid: { color: '#e4e4e7', drawBorder: false }, ticks: { color: '#71717a', font: { size: 12 } } }
+          x: { grid: { display: false }, ticks: { color: '#526f93', font: { size: 12 } } },
+          y: { grid: { color: '#d5e3f5', drawBorder: false }, ticks: { color: '#526f93', font: { size: 12 } } }
         }
       };
 
@@ -93,12 +93,12 @@
             label: 'Applicants',
             data: [],
             fill: true,
-            backgroundColor: 'rgba(24,24,27,0.08)',
-            borderColor: '#18181b',
+            backgroundColor: 'rgba(37,99,235,0.12)',
+            borderColor: '#2563eb',
             borderWidth: 2,
             tension: 0.4,
             pointRadius: 4,
-            pointBackgroundColor: '#18181b',
+            pointBackgroundColor: '#2563eb',
           }]
         },
         options: chartOpts
@@ -112,7 +112,7 @@
           datasets: [{
             label: 'Applicants',
             data: [],
-            backgroundColor: '#18181b',
+            backgroundColor: '#2563eb',
             borderRadius: 4,
             barThickness: 40,
           }]

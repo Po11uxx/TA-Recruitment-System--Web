@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>TA RecruitPro</title>
+  <title>UCI BioSci — TA Recruitment</title>
   <meta name="ctx" content="<%= request.getContextPath() %>">
   <jsp:include page="/common/head.jsp"/>
 </head>
@@ -12,10 +12,7 @@
   %>
   <nav class="fixed inset-x-0 top-0 z-50 flex h-20 items-center justify-between px-8 bg-zinc-950/40 backdrop-blur-lg border-b border-white/5 transition-all" id="navbar">
     <div class="flex items-center gap-3 font-semibold text-xl tracking-tight">
-      <div class="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-        <span class="text-zinc-950 text-sm font-black">TA</span>
-      </div>
-      <span>RecruitPro</span>
+      <a href="<%= ctx %>/index.jsp" class="uci-app-brand" aria-label="UCI BioSci TA Recruitment home"><span>UCI BioSci</span><small>TA Recruitment</small></a>
     </div>
     <div class="flex items-center gap-6">
       <a href="<%= ctx %>/auth/login.jsp" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Log in</a>
@@ -30,9 +27,10 @@
   </div>
 
   <main class="relative z-10 pt-48 pb-20 flex flex-col items-center text-center px-6 parallax-bg" id="parallax-content">
+    <div class="uci-hero-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
     <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-zinc-300 mb-10 shadow-sm slide-up-element backdrop-blur-sm">
       <i data-lucide="zap" class="h-4 w-4 text-indigo-400"></i>
-      <span>Next-generation TA recruitment</span>
+      <span>TA recruitment for UCI BioSci</span>
     </div>
 
     <h1 class="text-6xl md:text-8xl font-black tracking-tight text-white max-w-5xl slide-up-element delay-100 leading-tight drop-shadow-2xl h-[120px] md:h-[160px] flex flex-col items-center justify-center">
@@ -41,7 +39,7 @@
     </h1>
 
     <p class="mt-4 text-xl text-zinc-300 max-w-2xl slide-up-element delay-200">
-      A transparent, efficient, and beautifully designed platform for universities to manage TA applications, reviews, and assignments in one unified workspace.
+      A unified workspace for UCI BioSci students, faculty, and administrators to manage TA applications, reviews, and teaching assignments.
     </p>
 
     <div class="mt-14 flex flex-col sm:flex-row items-center gap-4 w-full justify-center slide-up-element delay-300 relative z-20">
@@ -141,11 +139,8 @@
 
   <!-- Dark Footer -->
   <footer class="bg-zinc-950 py-12 border-t border-zinc-900 text-center relative z-40">
-    <div class="max-w-7xl mx-auto px-6 text-zinc-500">
-      <div class="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center mx-auto mb-6">
-        <span class="text-zinc-300 text-sm font-black">TA</span>
-      </div>
-    </div>
+    <div class="mx-auto w-full max-w-sm px-8 py-4"><jsp:include page="/common/uci-wordmark.jsp"/></div>
+    <p class="mt-6 text-sm text-blue-200">UCI BioSci · TA Recruitment &amp; Management</p>
   </footer>
 
   <script src="<%= ctx %>/static/js/api.js"></script>
