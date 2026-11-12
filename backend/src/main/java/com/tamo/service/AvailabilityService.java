@@ -55,18 +55,31 @@ public class AvailabilityService {
         if (!editable(period(periodId))) throw new Problem(403, "Availability can only be updated while this application period is open.");
         if (body == null) throw new Problem(400, "Availability details are required.");
         if (!TIME_ZONE.equals(text(body, "timeZone", 64))) throw new Problem(400, "Use the UCI timezone: " + TIME_ZONE + ".");
-        List<WeeklyAvailability.Slot> available = slots(body, "availableSlots", true);
-        List<WeeklyAvailability.Slot> conflicts = slots(body, "conflictSlots", false);
-        boolean none = false;
-        if (body.has("noAvailability")) {
-            JsonElement value = body.get("noAvailability");
-            if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isBoolean()) throw new Problem(400, "noAvailability must be true or false.");
-            none = value.getAsBoolean();
-        }
-        if (available.isEmpty() && !none) throw new Problem(400, "Add an available time slot or confirm that you have no availability this period.");
-        if (none && !available.isEmpty()) throw new Problem(400, "Remove available slots before selecting no availability.");
-        for (var a : available) for (var c : conflicts) {
-            if (overlaps(a, c)) throw new Problem(400, "Available times cannot overlap known conflicts. Adjust the available slots.");
+        List<WeeklyAvailability.Slot> available;
+        List<WeeklyAvailability.Slot> conflicts;
+        boolean none;
+        if (body.has("confirmUnmarkedAvailable")) {
+            JsonElement confirmation = body.get("confirmUnmarkedAvailable");
+            if (!confirmation.isJsonPrimitive() || !confirmation.getAsJsonPrimitive().isBoolean() || !confirmation.getAsBoolean()) {
+                throw new Problem(400, "Confirm that unmarked times are available before saving.");
+            }
+            conflicts = slots(body, "conflictSlots", true, 512);
+            available = complement(conflicts);
+            none = available.isEmpty();
+        } else {
+            available = slots(body, "availableSlots", true);
+            conflicts = slots(body, "conflictSlots", false);
+            none = false;
+            if (body.has("noAvailability")) {
+                JsonElement value = body.get("noAvailability");
+                if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isBoolean()) throw new Problem(400, "noAvailability must be true or false.");
+                none = value.getAsBoolean();
+            }
+            if (available.isEmpty() && !none) throw new Problem(400, "Add an available time slot or confirm that you have no availability this period.");
+            if (none && !available.isEmpty()) throw new Problem(400, "Remove available slots before selecting no availability.");
+            for (var a : available) for (var c : conflicts) {
+                if (overlaps(a, c)) throw new Problem(400, "Available times cannot overlap known conflicts. Adjust the available slots.");
+            }
         }
         WeeklyAvailability previous = find(userId, periodId);
         WeeklyAvailability record = new WeeklyAvailability();
@@ -95,11 +108,39 @@ public class AvailabilityService {
         return result;
     }
 
+    private static List<WeeklyAvailability.Slot> complement(List<WeeklyAvailability.Slot> conflicts) {
+        String opening = "08:00", closing = "20:00";
+        List<WeeklyAvailability.Slot> available = new ArrayList<>();
+        for (int day = 1; day <= 5; day++) {
+            String start = opening;
+            for (var busy : conflicts) {
+                if (busy.getDayOfWeek() != day || busy.getEndTime().compareTo(opening) <= 0
+                        || busy.getStartTime().compareTo(closing) >= 0) continue;
+                addAvailable(available, day, start,
+                        busy.getStartTime().compareTo(opening) < 0 ? opening : busy.getStartTime());
+                start = busy.getEndTime().compareTo(closing) > 0 ? closing : busy.getEndTime();
+            }
+            addAvailable(available, day, start, closing);
+        }
+        return available;
+    }
+
+    private static void addAvailable(List<WeeklyAvailability.Slot> slots, int day, String start, String end) {
+        if (start.compareTo(end) >= 0) return;
+        WeeklyAvailability.Slot slot = new WeeklyAvailability.Slot();
+        slot.setDayOfWeek(day); slot.setStartTime(start); slot.setEndTime(end); slot.setReason("");
+        slots.add(slot);
+    }
+
     private static List<WeeklyAvailability.Slot> slots(JsonObject body, String key, boolean required) {
+        return slots(body, key, required, 70);
+    }
+
+    private static List<WeeklyAvailability.Slot> slots(JsonObject body, String key, boolean required, int limit) {
         if (!body.has(key) && !required) return new ArrayList<>();
         if (!body.has(key) || !body.get(key).isJsonArray()) throw new Problem(400, key + " must be an array.");
         JsonArray rows = body.getAsJsonArray(key);
-        if (rows.size() > 70) throw new Problem(400, "Too many time slots.");
+        if (rows.size() > limit) throw new Problem(400, "Too many time slots.");
         List<WeeklyAvailability.Slot> result = new ArrayList<>();
         for (JsonElement value : rows) {
             if (!value.isJsonObject()) throw new Problem(400, "Each time slot must be an object.");

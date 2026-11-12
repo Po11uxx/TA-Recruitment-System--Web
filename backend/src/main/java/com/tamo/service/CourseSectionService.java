@@ -3,6 +3,7 @@ package com.tamo.service;
 import com.google.gson.*;
 import com.tamo.model.CourseSection;
 import com.tamo.model.Module;
+import com.tamo.model.User;
 import com.tamo.util.JsonUtil;
 import java.time.Clock;
 import java.util.*;
@@ -23,15 +24,25 @@ public class CourseSectionService {
     private void staff(String role) {
         if (!"admin".equals(role) && !"organiser".equals(role)) throw new Problem(403, "Only authorized staff can manage course sections.");
     }
-    private Module module(String userId, String role, String id) {
+    private User actor(String userId,String role) {
         staff(role);
+        return data.getData().getUsers().stream()
+                .filter(u -> Objects.equals(userId,u.getId()) && role.equals(u.getRole()) && "active".equals(u.getStatus()))
+                .findFirst().orElseThrow(() -> new Problem(403,"An active staff account is required."));
+    }
+    private void requireWrite(String userId,String role,Module module) {
+        if(!ReviewAccess.canWrite(actor(userId,role),module,ReviewAccess.CONFIGURE_COURSE))
+            throw new Problem(403,"Course configuration access is required for this course.");
+    }
+    private Module module(String userId, String role, String id) {
+        actor(userId,role);
         Module module = data.getData().getModules().stream().filter(m -> m.getId().equals(id)).findFirst()
                 .orElseThrow(() -> new Problem(404, "Course not found."));
         if (!"admin".equals(role) && !Objects.equals(userId, module.getOrganiserId())) throw new Problem(403, "You can only manage sections for your assigned courses.");
         return module;
     }
     public List<JsonObject> modules(String userId, String role) {
-        staff(role);
+        actor(userId,role);
         return data.getData().getModules().stream().filter(m -> "admin".equals(role) || Objects.equals(userId, m.getOrganiserId()))
                 .map(m -> JsonUtil.getGson().toJsonTree(m).getAsJsonObject()).toList();
     }
@@ -41,6 +52,7 @@ public class CourseSectionService {
         List<CourseSection> sections = data.getData().getCourseSections().stream().filter(s -> moduleId.equals(s.getModuleId())).filter(s->periodId==null||("legacy_unscoped".equals(periodId)?s.getPeriodId()==null:periodId.equals(s.getPeriodId()))).toList();
         JsonObject result = new JsonObject();
         result.add("module", JsonUtil.getGson().toJsonTree(module));
+        result.addProperty("canConfigure",ReviewAccess.canWrite(actor(userId,role),module,ReviewAccess.CONFIGURE_COURSE));
         result.add("sections", JsonUtil.getGson().toJsonTree(sections));
         result.addProperty("timeZone", TIME_ZONE);
         result.addProperty("taPositionsRequested", sections.stream().filter(s -> "active".equals(s.getStatus())).mapToInt(CourseSection::getTaPositions).sum());
@@ -49,6 +61,7 @@ public class CourseSectionService {
     }
     public CourseSection create(String userId, String role, String moduleId, JsonObject body) {
         Module course=module(userId, role, moduleId);
+        requireWrite(userId,role,course);
         String period=text(body,"periodId",100,true);
         if(data.getData().getApplicationPeriods().stream().noneMatch(p->period.equals(p.getId())))throw new Problem(400,"Choose an existing application period.");
         CourseSection section = new CourseSection();
@@ -62,7 +75,8 @@ public class CourseSectionService {
         staff(role);
         CourseSection section = data.getData().getCourseSections().stream().filter(s -> s.getId().equals(id)).findFirst()
                 .orElseThrow(() -> new Problem(404, "Section not found."));
-        module(userId, role, section.getModuleId()); return section;
+        requireWrite(userId,role,module(userId,role,section.getModuleId()));
+        return section;
     }
     public CourseSection update(String userId, String role, String id, JsonObject body) {
         CourseSection original = section(userId, role, id);

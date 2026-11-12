@@ -73,7 +73,7 @@
         </div>
         <div class="flex items-center justify-between py-4 px-6 hover:bg-zinc-50/50 transition-colors">
           <div class="flex items-center gap-4"><span class="font-medium text-zinc-900">Teaching Assistant</span><span class="badge badge-success">Active</span></div>
-          <span class="text-sm text-zinc-500">applicant role</span>
+          <span class="text-sm text-zinc-500">Applicant role</span>
         </div>
       </div>
     </div>

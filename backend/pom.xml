@@ -10,7 +10,7 @@
     <packaging>war</packaging>
 
     <name>TA&amp;MO Backend</name>
-    <description>TA Recruitment Platform - Java Servlet Backend</description>
+    <description>TA Application Platform - Java Servlet Backend</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

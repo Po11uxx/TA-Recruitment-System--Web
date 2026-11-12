@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Sign In - UCI BioSci — TA Recruitment</title>
+  <title>Sign In - UCI BioSci — TA Application System</title>
   <meta name="ctx" content="<%= request.getContextPath() %>">
   <jsp:include page="/common/head.jsp"/>
 </head>
@@ -20,7 +20,7 @@
         <i data-lucide="arrow-left" class="h-5 w-5 group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-medium text-sm sm:text-base"><span class="sm:hidden">Home</span><span class="hidden sm:inline">Back to Home</span></span>
       </a>
-      <div class="uci-auth-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
+      <a class="uci-auth-identity" href="https://www.bio.uci.edu/" aria-label="Visit the UCI School of Biological Sciences website"><jsp:include page="/common/uci-wordmark.jsp"/></a>
     </div>
     
     <!-- Title Area -->
@@ -64,24 +64,6 @@
               </div>
             </div>
 
-            <label class="block text-sm">Advanced review role (if applicable)<select class="apple-input" onchange="if(this.value)selectedRole=this.value"><option value="">Use role below</option><option value="reviewer">Advanced review role: Reviewer</option><option value="decision_maker">Advanced review role: Decision-maker</option><option value="viewer">Advanced review role: Viewer</option></select></label>
-            <!-- Role Selector -->
-            <div>
-              <label class="block text-sm font-bold text-zinc-900 text-center mb-3">Select Role</label>
-              <div class="segmented-control">
-                <input type="radio" id="role-applicant" name="role" value="APPLICANT" checked onchange="selectedRole='applicant'; if(mascotAnim) mascotAnim.setRoleColor('applicant');">
-                <label for="role-applicant">applicant</label>
-
-                <input type="radio" id="role-organiser" name="role" value="ORGANISER" onchange="selectedRole='organiser'; if(mascotAnim) mascotAnim.setRoleColor('organiser');">
-                <label for="role-organiser">Teacher</label>
-
-                <input type="radio" id="role-admin" name="role" value="ADMIN" onchange="selectedRole='admin'; if(mascotAnim) mascotAnim.setRoleColor('admin');">
-                <label for="role-admin">admin</label>
-                
-                <div class="segmented-highlight"></div>
-              </div>
-            </div>
-            
             <div id="errorMsg" class="hidden text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl px-6 py-3 text-center"></div>
 
             <!-- Buttons -->
@@ -128,7 +110,7 @@
         window.initParticles('auth-canvas');
       }
       if(window.initStitchMatrix) {
-        window.initStitchMatrix('stitch-matrix-login', { avoidSelector: '.apple-input, .segmented-control, button, a' });
+        window.initStitchMatrix('stitch-matrix-login', { avoidSelector: '.apple-input, button, a' });
       }
       if(window.initSimpleTypewriter) window.initSimpleTypewriter('typewriter-text', ["Log in.", "Welcome back.", "Continue."]);
       if(window.initLoginAnteater) {
@@ -140,22 +122,6 @@
     setTimeout(() => {
       document.querySelectorAll('.slide-up-element').forEach(el => el.classList.add('visible'));
     }, 50);
-
-    let selectedRole = 'applicant';
-
-    function selectRole(r) {
-      selectedRole = r;
-      document.querySelectorAll('.role-btn').forEach(btn => {
-        if (btn.dataset.role === r) {
-          btn.className = 'role-btn btn-pill-primary border border-transparent shadow-none w-full';
-        } else {
-          btn.className = 'role-btn btn-pill-outline border-zinc-200 text-zinc-500 hover:text-zinc-900 w-full';
-        }
-      });
-    }
-
-    // Initialize layout for role buttons
-    document.querySelectorAll('.role-btn').forEach(btn => btn.classList.add('w-full'));
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -173,8 +139,11 @@
       const ctx = document.querySelector('meta[name="ctx"]').content;
 
       try {
-        const data = await authApi.login(email, pwd, selectedRole);
-        const role = data.user?.role || selectedRole;
+        const data = await authApi.login(email, pwd);
+        const role = data.user?.role;
+        if (!['applicant','organiser','admin','reviewer','decision_maker','viewer'].includes(role)) {
+          throw new Error('Your account role could not be determined. Please contact an admin.');
+        }
         if(mascotAnim) mascotAnim.triggerSuccess();
         setTimeout(() => {
           window.location.href = ctx + (['reviewer','decision_maker','viewer'].includes(role)?'/review/dashboard.jsp':'/' + role + '/dashboard.jsp');

@@ -6,19 +6,29 @@
   String userName = (String) session.getAttribute("userName");
   if (userName == null || userName.isEmpty()) userName = "User";
 
+  boolean hasPersonalProfile = "applicant".equals(role);
+  String profilePath = ctx + "/applicant/profile.jsp";
+  boolean profileActive = hasPersonalProfile && currentPath.equals(profilePath);
+  String accountTag = hasPersonalProfile ? "a" : "div";
+  String accountAttributes = hasPersonalProfile
+      ? " href=\"" + com.tamo.util.JsonUtil.escapeHtml(profilePath) + "\" aria-label=\"Open personal profile\""
+          + (profileActive ? " aria-current=\"page\"" : "")
+      : "";
+  String accountClasses = hasPersonalProfile
+      ? (profileActive ? " bg-blue-100" : " hover:bg-blue-50") + " rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+      : "";
+
   String[][] navItems;
   String sectionRoot;
   if ("applicant".equals(role)) {
     sectionRoot = ctx + "/applicant";
     navItems = new String[][] {
       {"Dashboard", sectionRoot + "/dashboard.jsp", "layout-dashboard"},
-      {"My Assignments", sectionRoot + "/assignments.jsp", "calendar-check"},
-      {"My Applications", sectionRoot + "/applications.jsp", "briefcase"},
-      {"Find Jobs", sectionRoot + "/jobs.jsp", "users"},
-      {"Messages", sectionRoot + "/messages.jsp", "message-circle"},
-      {"Profile", sectionRoot + "/profile.jsp", "user"},
       {"TA Application Profile", sectionRoot + "/application-profile.jsp", "clipboard-list"},
       {"Weekly Availability", sectionRoot + "/availability.jsp", "calendar-clock"},
+      {"Find Jobs", sectionRoot + "/jobs.jsp", "users"},
+      {"My Applications", sectionRoot + "/applications.jsp", "briefcase"},
+      {"My TA Placements", sectionRoot + "/assignments.jsp", "calendar-check"},
     };
   } else if ("organiser".equals(role)) {
     sectionRoot = ctx + "/organiser";
@@ -30,7 +40,6 @@
       {"Course Sections", sectionRoot + "/course-sections.jsp", "calendar-range"},
       {"TA Assignments", sectionRoot + "/assignments.jsp", "calendar-check"},
       {"Pipeline", sectionRoot + "/pipeline.jsp", "users"},
-      {"Messages", sectionRoot + "/messages.jsp", "message-circle"},
     };
   } else if ("reviewer".equals(role)||"decision_maker".equals(role)||"viewer".equals(role)) {
     sectionRoot=ctx+"/review";navItems=new String[][]{{"Review Workspace",sectionRoot+"/dashboard.jsp","clipboard-check"}};
@@ -50,7 +59,6 @@
       {"Properties", sectionRoot + "/properties.jsp", "sliders"},
       {"Users", sectionRoot + "/users.jsp", "users"},
       {"Data Editor", sectionRoot + "/data-editor.jsp", "database"},
-      {"Messages", sectionRoot + "/messages.jsp", "message-circle"},
       {"System Logs", sectionRoot + "/logs.jsp", "settings"},
     };
   }
@@ -58,7 +66,7 @@
 <!-- Mobile Menu Button (visible on mobile only) -->
 <div class="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 backdrop-blur-md border-b border-zinc-200/50 z-40 flex items-center justify-between px-4">
   <div class="flex items-center gap-2 font-semibold">
-    <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Recruitment</small></div>
+    <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Application System</small></div>
   </div>
   <button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-zinc-100">
     <i data-lucide="menu" class="h-5 w-5"></i>
@@ -72,14 +80,13 @@
 <aside id="mobileSidebar" class="md:hidden fixed inset-y-0 left-0 w-64 bg-white z-50 transform -translate-x-full transition-transform duration-300 flex flex-col">
   <div class="flex h-14 items-center justify-between px-4">
     <div class="flex items-center gap-2 font-semibold">
-      <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Recruitment</small></div>
+      <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Application System</small></div>
     </div>
     <button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-zinc-100">
       <i data-lucide="x" class="h-5 w-5"></i>
     </button>
   </div>
   <div class="flex-1 overflow-auto py-4">
-    <div class="uci-sidebar-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
     <nav class="space-y-1 px-3">
       <% for (String[] item : navItems) {
         boolean isActive = currentPath.equals(item[1]) || currentPath.equals(item[1].replace(ctx, ""));
@@ -93,7 +100,7 @@
     </nav>
   </div>
   <div class="p-4 border-t border-zinc-200/50">
-    <div class="flex items-center gap-3 px-3 py-2 mb-2">
+    <<%= accountTag %><%= accountAttributes %> class="flex items-center gap-3 px-3 py-2 mb-2<%= accountClasses %>">
       <div class="h-8 w-8 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-600">
         <%= com.tamo.util.JsonUtil.escapeHtml(userName.substring(0,1).toUpperCase()) %>
       </div>
@@ -101,7 +108,8 @@
         <p class="text-sm font-medium text-zinc-900 truncate"><%= com.tamo.util.JsonUtil.escapeHtml(userName) %></p>
         <p class="text-xs text-zinc-500"><%= com.tamo.util.RoleLabels.display(role) %></p>
       </div>
-    </div>
+      <% if (hasPersonalProfile) { %><i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-zinc-400" aria-hidden="true"></i><% } %>
+    </<%= accountTag %>>
     <button onclick="doLogout()" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-100/50 hover:text-zinc-900">
       <i data-lucide="log-out" class="h-4 w-4"></i>
       <span>Sign out</span>
@@ -113,12 +121,11 @@
 <aside class="hidden md:flex w-64 flex-col border-r border-zinc-200/50 bg-white/50 backdrop-blur-xl flex-shrink-0">
   <div class="flex h-14 items-center px-6 pt-2">
     <div class="flex items-center gap-2 font-semibold">
-      <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Recruitment</small></div>
+      <div class="uci-app-brand"><span>UCI BioSci</span><small>TA Application System</small></div>
     </div>
   </div>
 
   <div class="flex-1 overflow-auto py-6">
-    <div class="uci-sidebar-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
     <nav class="space-y-1 px-4">
       <% for (String[] item : navItems) {
         boolean isActive = currentPath.equals(item[1]) || currentPath.equals(item[1].replace(ctx, ""));
@@ -134,7 +141,7 @@
   </div>
 
   <div class="p-4 mt-auto border-t border-zinc-200/50">
-    <div class="flex items-center gap-3 px-3 py-2 mb-2">
+    <<%= accountTag %><%= accountAttributes %> class="flex items-center gap-3 px-3 py-2 mb-2<%= accountClasses %>">
       <div class="h-8 w-8 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center text-xs font-bold text-zinc-600">
         <%= com.tamo.util.JsonUtil.escapeHtml(userName.substring(0,1).toUpperCase()) %>
       </div>
@@ -142,7 +149,8 @@
         <p class="text-sm font-medium text-zinc-900 truncate"><%= com.tamo.util.JsonUtil.escapeHtml(userName) %></p>
         <p class="text-xs text-zinc-500"><%= com.tamo.util.RoleLabels.display(role) %></p>
       </div>
-    </div>
+      <% if (hasPersonalProfile) { %><i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-zinc-400" aria-hidden="true"></i><% } %>
+    </<%= accountTag %>>
     <button onclick="doLogout()" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-100/50 hover:text-zinc-900 transition-colors">
       <i data-lucide="log-out" class="h-4 w-4"></i>
       <span>Sign out</span>

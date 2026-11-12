@@ -1,6 +1,8 @@
+> Messages 页面和聊天入口已暂时移除；审核备注与系统通知保留，后端消息 API 和历史数据未删除。下方历史聊天截图不代表当前可用功能。
+
 > 更新：面试功能已移除，旧版 PDF 与截图可能仍包含旧流程。以当前页面及 [移除说明](docs/interview-retirement.md) 为准。
 
-> 当前角色显示名称为 **applicant、Teacher、admin**；Teacher 保留内部 `organiser` 键和路由。Reviewer、Decision-maker、Viewer 明确属于高级审核角色，不迁移或合并已有账号。完整 CSV 页面、模板、预览、导入导出及共享 API 仅限有效的 **admin** 账号；Teacher 无 CSV 入口。
+> 当前角色显示名称为 **Applicant、Teacher、admin**；Teacher 保留内部 `organiser` 键和路由。Reviewer、Decision-maker、Viewer 明确属于高级审核角色，不迁移或合并已有账号。完整 CSV 页面、模板、预览、导入导出及共享 API 仅限有效的 **admin** 账号；Teacher 无 CSV 入口。
 
 > 当前版本：**Version 1（v1.0）**。本版本的完整改动说明见 [Version 1 版本说明](VERSION_1_zh.md)。
 
@@ -8,7 +10,7 @@
 
 > 当前 Proposal 流程与角色权限，以 [功能交接与验收](PROPOSAL_HANDOFF_zh.md) 为准（CSV 见上方新说明）。
 
-> 新功能：[回复截止时间、倒计时与自动释放名额](REPLY_DEADLINES_zh.md)。
+> 分配确认流程已简化：保留学生接受 / 拒绝，取消截止时间、倒计时和自动过期。见 [当前分配确认说明](REPLY_DEADLINES_zh.md)。
 
 > 新功能：[录用安排发布、学生接受/拒绝和站内通知](OFFER_RESPONSES_zh.md)。
 
@@ -66,7 +68,7 @@ TA&MO 平台是一个强大的、基于角色的助教招聘与管理系统。�
 
 ![注册页面](screenshot/02_signup_page.png)
 **UI 功能分解:**
-- 🔹 **角色选择**: 对于自助注册，当前仅限于注册为“申请人 (Applicant)”。
+- 🔹 **学生注册**: 自助注册固定创建 applicant 账号，不显示角色选择；职员账号由 admin 在后台创建。
 - 🔹 **表单验证**: 当密码不匹配或邮箱无效时，系统会实时飘红提示错误。
 
 ---

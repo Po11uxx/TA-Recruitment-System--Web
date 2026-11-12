@@ -265,7 +265,7 @@ def generate_quality():
     
     headers = ["Quality Attribute", "Architectural Tactic / Mechanism", "Implementation Evidence"]
     rows = [
-        ("Functional Suitability", "Role-specific APIs & Workflows", "Distinct Servlets (Applicant, Organiser, Admin)\nFull Kanban recruitment pipeline"),
+        ("Functional Suitability", "Role-specific APIs & Workflows", "Distinct Servlets (Applicant, Organiser, Admin)\nFull Kanban application pipeline"),
         ("Security (Authorization)", "Role-Based Access Control (RBAC)", "AuthFilter validating HttpSession attributes\nServer-side object ownership checks"),
         ("Maintainability", "Separation of Concerns (MVC)", "JSP (View), Servlet (Controller), Service (Business)\nSingle JsonDataService for data access"),
         ("Usability", "Defensive UI & Inline Feedback", "Client-side validation, Toast notifications\nPre-filled forms for application submission"),

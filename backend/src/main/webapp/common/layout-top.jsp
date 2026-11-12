@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>UCI BioSci — TA Recruitment</title>
+  <title>UCI BioSci — TA Application System</title>
   <meta name="ctx" content="<%= request.getContextPath() %>">
   <jsp:include page="/common/head.jsp"/>
 </head>

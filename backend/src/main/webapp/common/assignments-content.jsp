@@ -1,17 +1,18 @@
 <%@ page pageEncoding="UTF-8" %>
 <div class="max-w-6xl mx-auto space-y-6 pb-12">
-  <div><h1 class="text-3xl font-bold" id="assignmentsTitle"><%= "applicant".equals(session.getAttribute("role")) ? "My Assignments" : "TA Assignments" %></h1><p class="text-zinc-500 mt-2">Weekly meetings use America/Los_Angeles time. Totals and capacity are counted separately for each application period.</p></div>
+  <div><h1 class="text-3xl font-bold" id="assignmentsTitle"><%= "applicant".equals(session.getAttribute("role")) ? "My TA Placement" : "TA Assignments" %></h1><p id="assignmentTimeDescription" class="text-zinc-500 mt-2">Review your TA placement, section meetings and weekly hours here. Dates use your device time zone. Weekly meeting times are labeled with their course time zone. Totals and capacity are counted separately for each application period.</p></div>
   <div id="assignmentMessage" role="status" class="text-sm"></div>
   <div class="flex flex-wrap gap-4">
     <label class="text-sm">Application period<select id="assignmentPeriod" class="input mt-1"></select></label>
     <label class="text-sm" id="courseFilterLabel">Course<select id="assignmentCourse" class="input mt-1"></select></label>
     <label class="text-sm flex items-center gap-2"><input type="checkbox" id="assignmentHistory">Show other cancelled assignments</label>
-    <label class="text-sm">Result status<select id="assignmentResultFilter" class="input mt-1"><option value="">All results</option><option value="draft">Draft</option><option value="pending">Awaiting reply</option><option value="accepted">Accepted</option><option value="declined">Declined</option><option value="expired">Expired</option><option value="cancelled">Cancelled</option></select></label>
+    <label class="text-sm">Result status<select id="assignmentResultFilter" class="input mt-1"><option value="">All results</option><option value="draft">Draft</option><option value="pending">Awaiting reply</option><option value="accepted">Accepted</option><option value="declined">Declined</option><option value="cancelled">Cancelled</option></select></label>
     <button type="button" id="refreshAssignments" class="btn btn-outline self-end">Refresh</button>
   </div>
   <p id="assignmentResultSummary" class="text-sm font-medium" role="status"></p>
   <div id="assignmentStaff" class="space-y-5 hidden">
-    <section class="card p-5 space-y-4" aria-label="Assign a TA">
+    <p id="assignmentAccess" class="text-sm hidden" role="status">Read-only access for this course.</p>
+    <section id="assignmentDraftPanel" class="card p-5 space-y-4 hidden" aria-label="Assign a TA">
       <h2 class="text-lg font-bold">Prepare an assignment draft</h2>
       <p class="text-sm text-zinc-500">Only offered applications for this course and period are listed. Explicit availability conflicts and overlapping assignments cannot be overridden.</p>
       <form id="assignTaForm" class="space-y-4"><fieldset id="assignTaFields" class="space-y-4">
@@ -22,6 +23,7 @@
           <label class="flex gap-2 text-sm"><input id="confirmPending" type="checkbox">I have manually confirmed this applicant can attend all section meetings.</label>
           <label class="block text-sm">Confirmation note (10–1000 characters)<textarea id="confirmationNote" class="input mt-1" maxlength="1000" rows="3"></textarea></label>
         </div>
+        <label id="assignmentDraftReasonLabel" class="block text-sm hidden">Reason for acting on behalf of the Teacher<textarea id="assignmentDraftReason" class="input mt-1" maxlength="1000" rows="2"></textarea></label>
         <button class="btn btn-primary" id="assignTaButton" type="submit">Save draft</button>
       </fieldset></form>
     </section>
@@ -31,12 +33,8 @@
   <section class="space-y-3" aria-label="Assignments"><h2 class="text-lg font-bold">Assignments</h2><div id="assignmentRows" class="space-y-4"></div></section>
   <dialog id="assignmentActionDialog" class="rounded-xl p-6 max-w-lg w-full backdrop:bg-black/40">
     <form id="assignmentActionForm" class="space-y-4"><h2 id="assignmentActionTitle" class="text-lg font-bold"></h2><p id="assignmentActionDetails" class="text-sm whitespace-pre-line"></p>
-      <div id="assignmentDeadlineFields" class="space-y-2 hidden">
-        <label class="block text-sm"><span id="assignmentDeadlineLabel">Reply deadline</span><input id="assignmentReplyDeadline" type="text" class="input mt-1" autocomplete="off"></label>
-        <p id="assignmentDeadlineCampus" class="text-xs text-zinc-500"></p>
-        <p class="text-sm text-zinc-500">No reply by the deadline releases the reserved position automatically. Accepted assignments stay active.</p>
-      </div>
       <label id="assignmentDeclineReasonLabel" class="block text-sm hidden">Reason for declining<textarea id="assignmentDeclineReason" class="input mt-1" maxlength="1000" rows="3"></textarea></label>
+      <label id="assignmentPublishReasonLabel" class="block text-sm hidden">Reason for acting on behalf of the Teacher<textarea id="assignmentPublishReason" class="input mt-1" maxlength="1000" rows="2"></textarea></label>
       <p id="assignmentActionError" role="alert" class="text-sm text-red-700"></p>
       <div class="flex gap-3"><button id="submitAssignmentAction" type="submit" class="btn btn-primary">Confirm</button><button type="button" id="closeAssignmentAction" class="btn btn-outline">Back</button></div>
     </form>

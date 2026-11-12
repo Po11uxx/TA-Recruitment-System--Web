@@ -64,7 +64,6 @@ class DatabaseTransactionFilterTest {
             });
         }
         var order=inOrder(data);
-        order.verify(data).processAssignmentExpiry();
         order.verify(data).beginRequest();
         verify(data).beginRequest();
         verify(data).endRequest(!validationError);

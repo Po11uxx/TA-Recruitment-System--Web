@@ -79,21 +79,6 @@ public class JsonDataService {
         }
     }
 
-    /** Expiry commits separately so a rejected or stale user action cannot roll it back. */
-    public void processAssignmentExpiry() {
-        synchronized (lock) {
-            boolean active=false;
-            try {
-                beginRequest();active=true;
-                new SectionAssignmentService(this).expireDueAssignments();
-                active=false;endRequest(true);
-            } catch (RuntimeException e) {
-                if(active) try {endRequest(false);}catch(RuntimeException suppressed){e.addSuppressed(suppressed);}
-                throw e;
-            }
-        }
-    }
-
     public void endRequest(boolean success) {
         try {
             if (success) store.commit();

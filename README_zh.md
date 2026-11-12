@@ -1,6 +1,6 @@
 > 面试功能已移除，见 [面试移除说明](docs/interview-retirement.md)。历史 Version 1 说明和 PDF 不代表当前功能。
 
-> 当前角色显示名称为 **applicant、Teacher、admin**；Teacher 保留内部 `organiser` 键和路由。Reviewer、Decision-maker、Viewer 明确属于高级审核角色，不迁移或合并已有账号。完整 CSV 页面、模板、预览、导入导出及共享 API 仅限有效的 **admin** 账号；Teacher 无 CSV 入口。
+> 当前角色显示名称为 **Applicant、Teacher、admin**；Teacher 保留内部 `organiser` 键和路由。Reviewer、Decision-maker、Viewer 明确属于高级审核角色，不迁移或合并已有账号。完整 CSV 页面、模板、预览、导入导出及共享 API 仅限有效的 **admin** 账号；Teacher 无 CSV 入口。
 
 > 当前版本基准：**Version 1（v1.0）**。主要改动、测试结果和已知限制见 [Version 1 版本说明](VERSION_1_zh.md)。
 

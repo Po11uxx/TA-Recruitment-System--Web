@@ -22,6 +22,12 @@ public class AdminServlet extends HttpServlet {
     private AdminService service;
     private JsonDataService dataService;
 
+    private boolean readOnlyCollection(String collection, HttpServletResponse resp) throws IOException {
+        if (!java.util.Set.of("modules","jobs","applications","workloadAssignments","logs").contains(collection)) return false;
+        JsonUtil.writeError(resp,403,"This collection is read-only in Data Editor.");
+        return true;
+    }
+
     @Override
     /**
      * Executes the init operation.
@@ -181,6 +187,7 @@ public class AdminServlet extends HttpServlet {
             default -> {
                 if (path.startsWith("data-editor/")) {
                     String collection = path.substring("data-editor/".length());
+                    if (readOnlyCollection(collection, resp)) return;
                     Map<String, Object> result = service.addToCollection(collection, body);
                     if (result.containsKey("error")) {
                         JsonUtil.writeError(resp, (int) result.get("code"), (String) result.get("error"));
@@ -244,23 +251,13 @@ public class AdminServlet extends HttpServlet {
             }
 
         } else if (path.matches("workload/[\\w]+/reassign")) {
-            String taId = path.split("/")[1];
-            Map<String, Object> result = service.reassignWorkload(taId, body);
-            if (result.containsKey("error")) {
-                int code = (int) result.get("code");
-                JsonUtil.writeError(resp, code, (String) result.get("error"));
-            } else {
-                JsonObject ok = new JsonObject();
-                ok.addProperty("message", "Workload reassigned successfully");
-                JsonUtil.writeJson(resp, ok);
-                dataService.addLog("Workload Reassigned", "info", actor, adminId,
-                        "Reassigned workload for TA " + taId, ip);
-            }
+            JsonUtil.writeError(resp,403,"Use TA Assignments to manage course placements.");
 
         } else if (path.matches("data-editor/[\\w]+/[\\w-]+")) {
             String[] segments = path.split("/");
             String collection = segments[1];
             String itemId = segments[2];
+            if (readOnlyCollection(collection, resp)) return;
             Map<String, Object> result = service.updateCollectionItem(collection, itemId, body);
             if (result.containsKey("error")) {
                 int code = (int) result.get("code");
@@ -328,6 +325,7 @@ public class AdminServlet extends HttpServlet {
             String[] segments = path.split("/");
             String collection = segments[1];
             String itemId = segments[2];
+            if (readOnlyCollection(collection, resp)) return;
             Map<String, Object> result = service.deleteFromCollection(collection, itemId);
             if (result.containsKey("error")) {
                 int code = (int) result.get("code");

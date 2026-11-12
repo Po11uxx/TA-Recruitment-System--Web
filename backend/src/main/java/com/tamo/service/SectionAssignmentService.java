@@ -5,8 +5,6 @@ import com.tamo.model.*;
 import com.tamo.model.Module;
 import com.tamo.util.JsonUtil;
 import java.time.Clock;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /** Mutations run inside the shared database transaction/advisory lock. */
@@ -22,14 +20,15 @@ public class SectionAssignmentService {
     private void staff(String role) {
         if (!Set.of("admin","organiser").contains(role == null ? "" : role)) throw new Problem(403,"Only staff can manage assignments.");
     }
-    private void reviewStaff(String user, String role) {
+    private User reviewStaff(String user, String role) {
         User actor=data.getData().getUsers().stream().filter(u->Objects.equals(user,u.getId())&&"active".equals(u.getStatus())&&Objects.equals(role,u.getRole())).findFirst().orElseThrow(()->new Problem(403,"An active authorised staff account is required."));
         if (!ReviewAccess.can(actor,"review.read")) throw new Problem(403,"Current application review permission is required.");
+        return actor;
     }
     private Module module(String user,String role,String id) {
-        staff(role); reviewStaff(user,role);
+        staff(role); User actor=reviewStaff(user,role);
         Module m=data.getData().getModules().stream().filter(x->Objects.equals(id,x.getId())).findFirst().orElseThrow(()->new Problem(404,"Course not found."));
-        if (!"admin".equals(role) && !Objects.equals(user,m.getOrganiserId())) throw new Problem(403,"You can only manage your assigned courses.");
+        if (!ReviewAccess.canWrite(actor,m,ReviewAccess.MANAGE_ASSIGNMENTS)) throw new Problem(403,"Assignment management access is required for this course.");
         return m;
     }
     private CourseSection section(String id) {
@@ -82,15 +81,11 @@ public class SectionAssignmentService {
         if (!JobSectionService.includes(job(app),section(a.getSectionId()))) throw new Problem(409,"This Section is not included in the TA posting.");
         if(!ReviewService.approvedForSection(data.getData(),app.getId(),a.getSectionId())) throw new Problem(409,"An authorized selection approval is required before assignment.");
         if (!"offer".equals(app.getStatus())) throw new Problem(409,"Application must still be at the offer stage.");
-        Instant deadline;
-        try { deadline=Instant.parse(text(body,"responseDeadline",true)); }
-        catch (DateTimeParseException e) { throw new Problem(400,"Use a valid ISO date and time with a time zone for the reply deadline."); }
-        if (!deadline.isAfter(clock.instant())) throw new Problem(400,"Reply deadline must be in the future.");
-        a.setResponseDeadline(deadline.toString());
+        String delegationReason=delegationReason(role,body);
         a.setPublicationStatus("published");a.setPublishedBy(user);a.setPublishedAt(clock.instant().toString());
         notifyUser(a.getApplicantId(),"assignment_published","TA assignment ready for your reply",
-                "Your assignment for "+a.getSectionSnapshot().getName()+" has been published. Review its meetings and weekly hours in My Assignments, then accept or decline before "+a.getResponseDeadline()+" (UTC).",a.getId());
-        data.save();return a;
+                "Your assignment for "+a.getSectionSnapshot().getName()+" has been published. Review its meetings and weekly hours in My TA Placement, then accept or decline.",a.getId());
+        data.save();auditDelegation(user,a,"Published",delegationReason);return a;
     }
     public SectionAssignment respond(String user,String role,String id,JsonObject body) {
         if (!"applicant".equals(role)) throw new Problem(403,"Only the assigned applicant can respond.");
@@ -98,7 +93,6 @@ public class SectionAssignmentService {
         // Unpublished rows are not visible to applicants, even if an ID is guessed.
         if (!Objects.equals(user,a.getApplicantId()) || !"published".equals(a.getPublicationStatus())) throw new Problem(404,"Published assignment not found.");
         if (!"active".equals(a.getStatus()) || !"pending".equals(a.getResponseStatus())) throw new Problem(409,"This assignment is no longer awaiting a reply.");
-        if (a.getResponseDeadline()==null || !clock.instant().isBefore(Instant.parse(a.getResponseDeadline()))) throw new Problem(409,"The reply deadline has passed. This assignment can no longer be accepted or declined.");
         String decision=text(body,"decision",true);
         if (!Set.of("accept","decline").contains(decision)) throw new Problem(400,"Choose accept or decline.");
         String reason="decline".equals(decision)?text(body,"reason",true):"";
@@ -112,31 +106,13 @@ public class SectionAssignmentService {
                 name+" "+a.getResponseStatus()+" the assignment for "+a.getSectionSnapshot().getName()+". Review TA Assignments for details.",a.getId());
         data.save();return a;
     }
-    /** Run in its own committed maintenance transaction, independently of a later rejected request. */
-    public int expireDueAssignments() {
-        Instant now=clock.instant();int count=0;
-        for (SectionAssignment a:data.getData().getSectionAssignments()) {
-            if (!"active".equals(a.getStatus()) || !"published".equals(a.getPublicationStatus()) || !"pending".equals(a.getResponseStatus()) || a.getResponseDeadline()==null) continue;
-            if (now.isBefore(Instant.parse(a.getResponseDeadline()))) continue;
-            a.setStatus("cancelled");a.setResponseStatus("expired");a.setExpiredAt(now.toString());
-            a.setCancelledBy("system");a.setCancelledAt(now.toString());a.setCancellationReason("Reply deadline passed without a student response.");
-            notifyUser(a.getApplicantId(),"assignment_expired","TA assignment reply deadline passed",
-                    "The reply deadline for "+a.getSectionSnapshot().getName()+" has passed. The reserved position has been released. Review My Assignments for details.",a.getId());
-            data.getData().getModules().stream().filter(m->Objects.equals(a.getSectionSnapshot().getModuleId(),m.getId())).findFirst().ifPresent(m->{
-                if(m.getOrganiserId()!=null) notifyUser(m.getOrganiserId(),"assignment_expired","TA assignment expired",
-                        "No reply was received for "+a.getSectionSnapshot().getName()+" before the deadline. The reserved position has been released. Review TA Assignments for details.",a.getId());
-            });
-            data.addLog("TA Assignment Expired","info","System","system","Expired assignment "+a.getId()+" at reply deadline "+a.getResponseDeadline(),"127.0.0.1");
-            count++;
-        }
-        if(count>0)data.save();return count;
-    }
     private void notifyUser(String user,String type,String title,String message,String relatedId) {
         Notification n=new Notification();n.setId("notification_"+UUID.randomUUID().toString().replace("-",""));n.setUserId(user);n.setType(type);
         n.setTitle(title);n.setMessage(message);n.setRelatedId(relatedId);n.setCreatedAt(clock.instant().toString());n.setRead(false);
         data.getData().getNotifications().add(n);
     }
     public JsonObject studentView(SectionAssignment a) { return row(a,false); }
+    public JsonObject staffView(SectionAssignment a) { return row(a,true); }
     public long occupied(String section,String period) {
         return data.getData().getSectionAssignments().stream().filter(a->"active".equals(a.getStatus()) && Objects.equals(section,a.getSectionId()) && Objects.equals(period,a.getPeriodId())).count();
     }
@@ -165,13 +141,26 @@ public class SectionAssignmentService {
             if (!"active".equals(existing.getStatus()) || !app.getApplicantId().equals(existing.getApplicantId()) || !app.getPeriodId().equals(existing.getPeriodId())) continue;
             if (overlaps(s,existing.getSectionSnapshot())) throw new Problem(409,"Meeting times overlap another active assignment in this application period.");
         }
+        String delegationReason=delegationReason(role,body);
         SectionAssignment a=new SectionAssignment();
         a.setId("assignment_"+UUID.randomUUID().toString().replace("-","")); a.setApplicationId(app.getId());
         a.setApplicantId(app.getApplicantId()); a.setSectionId(s.getId()); a.setPeriodId(app.getPeriodId());
         a.setStatus("active"); a.setAssignedBy(user); a.setAssignedAt(clock.instant().toString());
         a.setManualConfirmationNote("pending".equals(status)?note:"");
         a.setSectionSnapshot(JsonUtil.getGson().fromJson(JsonUtil.getGson().toJson(s),CourseSection.class));
-        data.getData().getSectionAssignments().add(a); data.save(); return a;
+        data.getData().getSectionAssignments().add(a); data.save(); auditDelegation(user,a,"Drafted",delegationReason); return a;
+    }
+    private String delegationReason(String role,JsonObject body) {
+        if(!"admin".equals(role)) return null;
+        try {
+            return QualificationService.text(body,"reason",4000,true);
+        } catch(QualificationService.Problem e) {
+            throw new Problem(e.status,e.getMessage());
+        }
+    }
+    private void auditDelegation(String user,SectionAssignment assignment,String action,String reason) {
+        if(reason!=null) data.addLog("Delegated TA Assignment","info",null,user,
+                action+" assignment "+assignment.getId()+" for section "+assignment.getSectionId()+" | reason: "+reason,null);
     }
     private boolean overlaps(CourseSection a,CourseSection b) {
         if (b==null || b.getMeetingTimes()==null || a.getMeetingTimes()==null || !Objects.equals(a.getTimeZone(),b.getTimeZone())) throw new Problem(409,"Existing schedule needs review before another assignment can be made.");
@@ -187,7 +176,7 @@ public class SectionAssignmentService {
         String reason=text(body,"reason",true);
         a.setStatus("cancelled"); a.setCancelledBy(user); a.setCancelledAt(clock.instant().toString()); a.setCancellationReason(reason);
         if ("published".equals(a.getPublicationStatus())) notifyUser(a.getApplicantId(),"assignment_cancelled","TA assignment cancelled",
-                "Your assignment for "+a.getSectionSnapshot().getName()+" has been cancelled. Review My Assignments for details.",a.getId());
+                "Your assignment for "+a.getSectionSnapshot().getName()+" has been cancelled. Review My TA Placement for details.",a.getId());
         data.save(); return a;
     }
     private String text(JsonObject body,String key,boolean required) {
@@ -201,6 +190,7 @@ public class SectionAssignmentService {
     }
     private JsonObject row(SectionAssignment a, boolean staffView) {
         JsonObject row=JsonUtil.getGson().toJsonTree(a).getAsJsonObject();
+        row.remove("responseDeadline");row.remove("expiredAt");
         row.addProperty("weeklyHoursTotal",staffView?weeklyHours(a.getApplicantId(),a.getPeriodId()):publishedWeeklyHours(a.getApplicantId(),a.getPeriodId()));
         row.addProperty("acceptedWeeklyHoursTotal",acceptedWeeklyHours(a.getApplicantId(),a.getPeriodId()));
         Module m=data.getData().getModules().stream().filter(x->Objects.equals(a.getSectionSnapshot().getModuleId(),x.getId())).findFirst().orElse(null);
@@ -210,7 +200,9 @@ public class SectionAssignmentService {
         return row;
     }
     public JsonObject list(String user,String role) {
-        boolean student="applicant".equals(role); if (!student) { staff(role); reviewStaff(user,role); }
+        boolean student="applicant".equals(role);
+        if(!student) staff(role);
+        User actor=student?null:reviewStaff(user,role);
         DataStore ds=data.getData();
         Set<String> courses=new HashSet<>();
         ds.getModules().stream().filter(m->"admin".equals(role)||Objects.equals(user,m.getOrganiserId())).forEach(m->courses.add(m.getId()));
@@ -222,6 +214,8 @@ public class SectionAssignmentService {
         }
         result.add("assignments",rows);
         if (!student) {
+            result.add("manageableCourseIds",JsonUtil.getGson().toJsonTree(ds.getModules().stream()
+                    .filter(m->ReviewAccess.canWrite(actor,m,ReviewAccess.MANAGE_ASSIGNMENTS)).map(Module::getId).toList()));
             result.add("modules",JsonUtil.getGson().toJsonTree(ds.getModules().stream().filter(m->courses.contains(m.getId())).toList()));
             JsonArray sections=new JsonArray();
             for (CourseSection s:ds.getCourseSections()) if (courses.contains(s.getModuleId())) sections.add(JsonUtil.getGson().toJsonTree(s));

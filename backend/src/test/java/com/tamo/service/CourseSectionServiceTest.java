@@ -27,9 +27,16 @@ class CourseSectionServiceTest {
         assertEquals(17, result.get("weeklyHoursRequested").getAsDouble());
         verify(data).save();
     }
-    @Test void adminCanManageAnyCourseButOrganiserListIsScoped() {
+    @Test void adminReadsAllCoursesButConfiguresOnlyDelegatedCourses() {
         assertEquals(1, service.modules("u005", "organiser").size());
         assertEquals(ds.getModules().size(), service.modules("u010", "admin").size());
+        assertFalse(service.list("u010","admin","m002").get("canConfigure").getAsBoolean());
+        assertEquals(403,assertThrows(CourseSectionService.Problem.class,()->service.create("u010","admin","m002",body())).status);
+        User admin=ReviewAccess.user(ds,"u010");
+        admin.setPermissions(java.util.List.of(ReviewAccess.CONFIGURE_COURSE));
+        admin.setCourseIds(java.util.List.of("m002"));
+        assertTrue(service.list("u010","admin","m002").get("canConfigure").getAsBoolean());
+        assertEquals(403,assertThrows(CourseSectionService.Problem.class,()->service.create("u010","admin","m001",body())).status);
         CourseSection section = service.create("u010", "admin", "m002", body());
         assertEquals("m002", section.getModuleId());
     }

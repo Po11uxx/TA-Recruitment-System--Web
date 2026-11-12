@@ -2,7 +2,7 @@
 <%@ include file="/common/auth-check.jsp" %>
 <jsp:include page="/common/layout-top.jsp" />
 <div class="space-y-5 max-w-6xl mx-auto"><h1 class="text-3xl font-bold">Workload Intel</h1><p>Accepted hours and reserved hours use formal Section assignments, grouped by application period.</p>
-<label>Application period<select id="workloadPeriod" class="input w-auto"></select></label><label>Search applicant<input id="workloadSearch" class="input"></label><a class="btn btn-outline" href="assignments.jsp">Manage assignments</a><div id="workloadRows" class="space-y-3" role="status"></div></div>
+<label>Application period<select id="workloadPeriod" class="input w-auto"></select></label><label>Search applicant<input id="workloadSearch" class="input"></label><a class="btn btn-outline" href="assignments.jsp">View assignments</a><div id="workloadRows" class="space-y-3" role="status"></div></div>
 <jsp:include page="/common/layout-bottom.jsp" />
 <script>
 (async()=>{

@@ -26,7 +26,7 @@
 **画面操作**：停留在登录页 `http://localhost:8080/tamo/auth/login.jsp`，背景动画在播放。
 
 **Narration (English):**
-> "Hello. This is **TA&MO**, our TA recruitment system for EBU 6304. It supports three roles: applicants, organisers, and admins. The app uses Java, JSP pages, and REST APIs. Let me show you how it works."
+> "Hello. This is **TA&MO**, our TA application system for EBU 6304. It supports three roles: applicants, organisers, and admins. The app uses Java, JSP pages, and REST APIs. Let me show you how it works."
 
 ---
 
@@ -35,11 +35,11 @@
 **画面操作**：
 1. 打开 `http://localhost:8080/tamo/index.jsp` — 滚动一下展示落地页。(5s)
 2. 点 "Log In" 进入登录页。
-3. **故意先输入错误密码** `wrong@xx.com / 12345`，role 选 Applicant，点 Log In → 出现红色错误提示。(8s)
-4. 改回正确账号 `alex.j@university.edu / demo123`，role = Applicant，登录成功。
+3. **故意先输入错误密码** `wrong@xx.com / 12345`，点 Log In → 出现红色错误提示。(8s)
+4. 改回正确账号 `alex.j@university.edu / demo123`，登录成功。
 
 **Narration (English):**
-> "This is the landing page. I click **Log In** and choose a role. First I use a wrong password. The page shows a clear error — it does not crash. Now I log in as **Alex Johnson**, an applicant. The system opens the applicant dashboard."
+> "This is the landing page. I click **Log In**. My account role is determined automatically after authentication. First I use a wrong password. The page shows a clear error — it does not crash. Now I log in as **Alex Johnson**, an applicant. The system opens the applicant dashboard."
 
 ---
 
@@ -124,7 +124,7 @@
 **Narration:**
 > "On **Manage Jobs**, Alan creates a new posting. If a required field is empty, the form shows an error. I fill all fields and save. The new job appears in the list."
 
-### 4.3 Recruitment Pipeline (Kanban) (4:25 – 5:25)
+### 4.3 Application Pipeline (Kanban) (4:25 – 5:25)
 
 **画面操作**：
 1. 菜单 **Pipeline** → 展示六列 Kanban：Applied / Review / Shortlisted / Interview / Offer / Rejected。

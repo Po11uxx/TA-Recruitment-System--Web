@@ -1,6 +1,10 @@
+> Messages pages and chat entry points are temporarily removed. Internal review notes and system notifications remain; backend messaging APIs and stored history are retained. Historical chat screenshots below do not represent an available feature.
+
+> Placement workflow: **My TA Placement** shows course / Section arrangements and allows students to accept or decline. Publishing requires no reply deadline; pending placements remain reserved until a reply or an authorised cancellation. This is not daily teaching-task management.
+
 > Update: Interview management has been removed. Older PDFs and screenshots may still show the retired workflow; see [current removal notes](docs/interview-retirement.md).
 
-> Current access policy: the primary role labels are **applicant**, **Teacher**, and **admin**. Teacher retains the internal `organiser` role key and routes. Reviewer, Decision-maker, and Viewer are explicitly advanced review roles; existing accounts and grants are preserved. Full CSV Import / Export, templates, previews, and the shared CSV API require an active **admin** account. Teacher has no CSV page or menu.
+> Current access policy: the primary role labels are **Applicant**, **Teacher**, and **admin**. Teacher retains the internal `organiser` role key and routes. Reviewer, Decision-maker, and Viewer are explicitly advanced review roles; existing accounts and grants are preserved. Full CSV Import / Export, templates, previews, and the shared CSV API require an active **admin** account. Teacher has no CSV page or menu.
 
 > Sponsor-aligned forms and CSV import/export are implemented. See [CSV workflow guide](SPONSOR_CSV_GUIDE_zh.md).
 
@@ -21,7 +25,7 @@
 </div>
 <br>
 
-The TA&MO platform is a robust role-based system for managing Teaching Assistant recruitment. Use this documentation to understand core concepts, set up your account, and execute role-specific tasks.
+The TA&MO platform is a robust role-based system for managing Teaching Assistant applications. Use this documentation to understand core concepts, set up your account, and execute role-specific tasks.
 
 ---
 
@@ -38,7 +42,7 @@ The TA&MO platform is a robust role-based system for managing Teaching Assistant
 Get authenticated and set up your profile immediately.
 
 ### Log in to the platform
-Navigate to `http://47.93.90.208:8080/tamo`. Enter your university email and password.
+Navigate to `http://47.93.90.208:8080/tamo`. Enter your university email and password. Your account role is determined automatically; no role selection is needed.
 
 ![Login Page](screenshot/01_login_page.png)
 **UI Breakdown:**
@@ -50,7 +54,7 @@ If you do not have an account, register as a new applicant.
 
 ![Sign Up Page](screenshot/02_signup_page.png)
 **UI Breakdown:**
-- 🔹 **Role Selection**: Locked to 'Applicant' for self-registration.
+- 🔹 **Student registration**: Self-registration creates an applicant account; staff accounts are created in the admin interface.
 - 🔹 **Form Validation**: Real-time error highlighting for mismatched passwords or invalid emails.
 
 ---
@@ -60,7 +64,7 @@ If you do not have an account, register as a new applicant.
 Instructions for browsing jobs, submitting applications, and communicating with Teachers.
 
 ### Navigate the Dashboard
-The Applicant Dashboard provides a high-level summary of your recruitment status.
+The Applicant Dashboard provides a high-level summary of your application status.
 
 ![Applicant Dashboard](screenshot/03_applicant_dashboard.png)
 **UI Breakdown:**
@@ -100,7 +104,7 @@ Provide a cover letter to finalize your application submission.
 - 🔹 **Submit Button**: Locks in current profile data and submits application.
 
 ### Track application status
-Monitor progression through the recruitment pipeline.
+Monitor progression through the application pipeline.
 
 ![My Applications](screenshot/07_applicant_my_applications.png)
 **UI Breakdown:**
@@ -152,7 +156,7 @@ Publish, edit, or toggle visibility of module listings.
 - 🔹 **Job List Table**: Actionable rows for toggling visibility or editing details.
 
 ### Progress candidates through the pipeline
-Use the Kanban board to manage recruitment stages.
+Use the Kanban board to manage application stages.
 
 ![Pipeline Workflow](screenshot/15_organiser_pipeline.png)
 **UI Breakdown:**

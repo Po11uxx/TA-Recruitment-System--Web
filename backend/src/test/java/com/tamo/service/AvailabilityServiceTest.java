@@ -108,4 +108,27 @@ class AvailabilityServiceTest {
         assertTrue(ds.getWeeklyAvailabilities().stream().anyMatch(a -> a.getApplicantId().equals("u001")));
         assertTrue(ds.getWeeklyAvailabilities().stream().anyMatch(a -> a.getApplicantId().equals("u002")));
     }
+    @Test void confirmedBusySlotsDeriveAvailabilityWithoutChangingEarlierSnapshots() {
+        WeeklyAvailability original = service.submissionSnapshot("u001", "period_test");
+        JsonObject input = body(); input.remove("availableSlots"); input.addProperty("confirmUnmarkedAvailable", true);
+        WeeklyAvailability saved = service.save("u001", "period_test", input);
+        assertFalse(saved.getConflictsOnly());
+        assertEquals(6, saved.getAvailableSlots().size());
+        assertEquals("12:00", saved.getAvailableSlots().get(1).getEndTime());
+        assertEquals("14:00", saved.getAvailableSlots().get(2).getStartTime());
+        assertNotEquals(saved.getAvailableSlots().size(), original.getAvailableSlots().size());
+    }
+    @Test void confirmedEmptyAndFullyBusyWeeksAreDistinct() {
+        JsonObject input = body(); input.remove("availableSlots"); input.addProperty("confirmUnmarkedAvailable", true);
+        JsonArray busy = new JsonArray(); input.add("conflictSlots", busy);
+        var clearWeek = service.save("u001", "period_test", input).getAvailableSlots();
+        assertEquals(5, clearWeek.size());
+        assertTrue(clearWeek.stream().allMatch(slot -> slot.getDayOfWeek() <= 5
+                && "08:00".equals(slot.getStartTime()) && "20:00".equals(slot.getEndTime())));
+        for (int day = 1; day <= 5; day++) {
+            JsonObject slot = new JsonObject(); slot.addProperty("dayOfWeek", day);
+            slot.addProperty("startTime", "07:50"); slot.addProperty("endTime", "20:10"); busy.add(slot);
+        }
+        assertTrue(service.save("u001", "period_test", input).getNoAvailability());
+    }
 }

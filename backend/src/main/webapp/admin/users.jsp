@@ -20,7 +20,7 @@
     </div>
     <select id="roleFilter" class="input w-auto" onchange="loadUsers()">
       <option value="">All Roles</option>
-      <option value="applicant">applicant</option>
+      <option value="applicant">Applicant</option>
       <option value="organiser">Teacher</option><option value="reviewer">Advanced review role: Reviewer</option><option value="decision_maker">Advanced review role: Decision-maker</option><option value="viewer">Advanced review role: Viewer</option>
       <option value="admin">admin</option>
     </select>
@@ -59,7 +59,7 @@
       <div><label for="uPassword" class="block text-sm font-medium text-zinc-700 mb-1.5">Password</label><input id="uPassword" type="password" class="input" placeholder="••••••••"></div>
       <div class="grid grid-cols-2 gap-4">
         <div><label for="uRole" class="block text-sm font-medium text-zinc-700 mb-1.5">Role</label>
-          <select id="uRole" class="input"><option value="applicant">applicant</option><option value="organiser">Teacher</option><option value="reviewer">Advanced review role: Reviewer</option><option value="decision_maker">Advanced review role: Decision-maker</option><option value="viewer">Advanced review role: Viewer</option><option value="admin">admin</option></select>
+          <select id="uRole" class="input"><option value="applicant">Applicant</option><option value="organiser">Teacher</option><option value="reviewer">Advanced review role: Reviewer</option><option value="decision_maker">Advanced review role: Decision-maker</option><option value="viewer">Advanced review role: Viewer</option><option value="admin">admin</option></select>
         </div>
         <div><label for="uStatus" class="block text-sm font-medium text-zinc-700 mb-1.5">Status</label>
           <select id="uStatus" class="input"><option value="active">Active</option><option value="suspended">Suspended</option></select>

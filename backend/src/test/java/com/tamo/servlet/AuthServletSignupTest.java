@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 class AuthServletSignupTest {
     @Test void publicSignupCannotCreateStaffEvenWithForgedRole() throws Exception {
-        for (String role : new String[]{"admin", "organiser"}) {
+        for (String role : new String[]{"admin", "organiser", "reviewer", "decision_maker", "viewer"}) {
             HttpServletRequest req = mock(HttpServletRequest.class);
             HttpServletResponse resp = mock(HttpServletResponse.class);
             when(req.getPathInfo()).thenReturn("/signup");

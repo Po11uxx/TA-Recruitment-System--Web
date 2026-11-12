@@ -12,7 +12,7 @@
       <button onclick="refreshData()" class="btn btn-secondary gap-2">
         <i data-lucide="refresh-cw" class="h-4 w-4"></i> Refresh
       </button>
-      <button onclick="openCreateModal()" class="btn btn-primary gap-2">
+      <button id="newDataRecord" onclick="openCreateModal()" class="btn btn-primary gap-2">
         <i data-lucide="plus" class="h-4 w-4"></i> New Record
       </button>
     </div>
@@ -31,7 +31,6 @@
       <button class="tab-btn" data-collection="terms">Terms</button>
       <button class="tab-btn" data-collection="departments">Departments</button>
       <button class="tab-btn" data-collection="logs">Logs</button>
-      <button class="tab-btn" data-collection="messages">Messages</button>
       <button class="tab-btn" data-collection="workloadAssignments">Workload</button>
     </nav>
   </div>
@@ -169,7 +168,6 @@ const COLLECTION_SCHEMAS = {
   terms: { fields: ['id','name','startDate','endDate','status'], key: 'id', display: ['id','name','startDate','endDate','status'] },
   departments: { fields: ['id','name','moduleCount','status'], key: 'id', display: ['id','name','moduleCount','status'] },
   logs: { fields: ['id','timestamp','action','actor','actorId','type','details','ip'], key: 'id', display: ['id','timestamp','action','actor','type','details'] },
-  messages: { fields: ['id','conversationId','senderId','receiverId','content','timestamp','read','replyToId','recalled','edited','editedAt','messageType','attachmentUrl','attachmentName','attachmentSize'], key: 'id', display: ['id','conversationId','senderId','receiverId','content','messageType','timestamp','read','recalled','edited'] },
   workloadAssignments: { fields: ['id','taUserId','moduleCode','hoursPerWeek','term','status'], key: 'id', display: ['id','taUserId','moduleCode','hoursPerWeek','term','status'] }
 };
 
@@ -218,6 +216,8 @@ function filterTable() {
 }
 
 function renderTable() {
+  const readOnly = ['modules','jobs','applications','workloadAssignments','logs'].includes(currentCollection);
+  document.getElementById('newDataRecord').classList.toggle('hidden',readOnly);
   const schema = COLLECTION_SCHEMAS[currentCollection];
   const displayFields = schema.display;
 
@@ -250,8 +250,8 @@ function renderTable() {
       return '<tr class="hover:bg-zinc-50/70 transition-colors">' + cells +
         '<td class="px-4 py-3 text-right whitespace-nowrap">' +
           '<button onclick="viewJson(\'' + escapeAttr(id) + '\')" class="p-1.5 text-zinc-400 hover:text-blue-600 rounded" title="View JSON"><i data-lucide="code" class="h-4 w-4"></i></button>' +
-          '<button onclick="editRecord(\'' + escapeAttr(id) + '\')" class="p-1.5 text-zinc-400 hover:text-zinc-900 rounded" title="Edit"><i data-lucide="edit-2" class="h-4 w-4"></i></button>' +
-          '<button onclick="deleteRecord(\'' + escapeAttr(id) + '\')" class="p-1.5 text-zinc-400 hover:text-red-600 rounded" title="Delete"><i data-lucide="trash-2" class="h-4 w-4"></i></button>' +
+          (readOnly ? '' : '<button onclick="editRecord(\'' + escapeAttr(id) + '\')" class="p-1.5 text-zinc-400 hover:text-zinc-900 rounded" title="Edit"><i data-lucide="edit-2" class="h-4 w-4"></i></button>' +
+          '<button onclick="deleteRecord(\'' + escapeAttr(id) + '\')" class="p-1.5 text-zinc-400 hover:text-red-600 rounded" title="Delete"><i data-lucide="trash-2" class="h-4 w-4"></i></button>') +
         '</td></tr>';
     }).join('');
   }
@@ -295,8 +295,7 @@ function showCreateWarnings() {
     msg = 'The userId must reference an existing user with role "applicant".';
   } else if (currentCollection === 'notifications') {
     msg = 'The userId must reference an existing user.';
-  } else if (currentCollection === 'messages') {
-    msg = 'senderId and receiverId must reference existing users; content is required. conversationId is auto-generated if omitted.';
+
   } else if (currentCollection === 'logs') {
     msg = 'actorId (if set) must reference an existing user.';
   }
@@ -501,7 +500,7 @@ function refreshData() {
 let allCollectionCache = {};
 
 async function preloadRelatedCollections() {
-  const collections = ['users','profiles','modules','jobs','applications','notifications','terms','departments','logs','messages','workloadAssignments'];
+  const collections = ['users','profiles','modules','jobs','applications','notifications','terms','departments','logs','workloadAssignments'];
   for (const c of collections) {
     try {
       const data = await request('/admin/data-editor/' + c);

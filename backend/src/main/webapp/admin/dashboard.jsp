@@ -6,7 +6,7 @@
     <div class="space-y-8 max-w-6xl mx-auto">
       <div>
         <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Platform Analytics</h1>
-        <p class="text-zinc-500 mt-2">Overview of recruitment metrics and system status.</p>
+        <p class="text-zinc-500 mt-2">Overview of application metrics and system status.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="statsGrid">

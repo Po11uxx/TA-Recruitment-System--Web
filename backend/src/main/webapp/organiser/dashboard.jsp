@@ -6,7 +6,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Teacher Overview</h1>
-          <p class="text-zinc-500 mt-2">Manage your TA recruitment pipeline across modules.</p>
+          <p class="text-zinc-500 mt-2">Manage your TA application pipeline across modules.</p>
         </div>
         <a href="<%= request.getContextPath() %>/organiser/jobs.jsp?create=true" class="btn btn-primary gap-2 shrink-0">
           <i data-lucide="plus" class="h-4 w-4"></i> Create Posting
@@ -77,7 +77,7 @@
             <div class="p-6 flex items-center justify-between gap-4">
               <div>
                 <p class="text-sm font-medium text-zinc-500">Notifications</p>
-                <h3 class="text-lg font-semibold text-zinc-900">Recruitment updates</h3>
+                <h3 class="text-lg font-semibold text-zinc-900">Application updates</h3>
               </div>
               <button type="button" onclick="markAllNotificationsRead()"
                 class="btn btn-ghost text-sm text-zinc-600 hover:text-zinc-900">

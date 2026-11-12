@@ -3,7 +3,7 @@
   const prefix = location.pathname.startsWith(CTX + '/admin/') ? '/admin/course-sections' : '/organiser/course-sections';
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const number = value => new Intl.NumberFormat('en-US', {maximumFractionDigits:2}).format(value);
-  let sections = [], editing = null, sequence = 0, copying = false;
+  let sections = [], editing = null, sequence = 0, copying = false, canConfigure = false;
   function message(text, error = false) { el('sectionMessage').textContent = text; el('sectionMessage').className = 'text-sm ' + (error ? 'text-red-700' : 'text-emerald-700'); }
   function text(parent, value, className = '') { const node = document.createElement('p'); node.className = className; node.textContent = value; parent.appendChild(node); }
   function addMeeting(value = {}) {
@@ -46,6 +46,7 @@
       text(cells[3], section.location || 'No location recorded', 'text-zinc-600');
       if (section.notes) text(cells[3], section.notes, 'mt-2 whitespace-pre-wrap break-words');
       function button(label, action) { const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn btn-outline text-xs mr-2 mb-2'; btn.textContent = label; btn.addEventListener('click', action); cells[4].appendChild(btn); }
+      if(!canConfigure)continue;
       if(section.periodId&&section.status==='active')button('Edit',()=>form(section));
       button('Copy to cycle',()=>{form(section);editing=null;copying=true;el('sectionCopyTargetLabel').classList.remove('hidden');el('sectionFormTitle').textContent='Copy section into a cycle';const choices=[...el('sectionCopyTarget').options];if(choices.length)el('sectionCopyTarget').value=choices[choices.length-1].value;message('Choose the target cycle in the copy form, then save a separate section record.');});
       button(section.status === 'active' ? 'Archive' : 'Restore', async event => {
@@ -60,16 +61,16 @@
   }
   async function load() {
     const current = ++sequence; const course = el('sectionCourse').value;
-    editing = null; sections = []; el('sectionFormPanel').classList.add('hidden'); el('newSection').disabled = true;
+    editing = null; sections = []; canConfigure = false; el('newSection').classList.add('hidden'); el('sectionFormPanel').classList.add('hidden'); el('newSection').disabled = true;
     el('sectionRows').replaceChildren(); el('sectionSummary').textContent = ''; el('sectionCourseInfo').textContent = '';
     if (!course) { message('Choose a course to manage its sections.'); return; }
     message('Loading sections…');
     const data = await request(prefix + '/modules/' + encodeURIComponent(course) + '/sections?periodId='+encodeURIComponent(el('sectionPeriod').value));
     if (current !== sequence) return;
-    sections = data.sections; el('newSection').disabled = el('sectionPeriod').value==='legacy_unscoped';
+    sections = data.sections; canConfigure = data.canConfigure === true; el('newSection').classList.toggle('hidden',!canConfigure); el('newSection').disabled = el('sectionPeriod').value==='legacy_unscoped';
     el('sectionCourseInfo').textContent = [data.module.code, data.module.name, data.module.term, data.module.organiserName].filter(Boolean).join(' · ');
     el('sectionSummary').textContent = 'Active sections: ' + sections.filter(s => s.status === 'active').length + ' · TA positions requested: ' + data.taPositionsRequested + ' · Combined TA hours / week: ' + number(data.weeklyHoursRequested);
-    render(); message('');
+    render(); message(canConfigure?'':'Read-only access for this course.');
   }
   el('sectionPeriod').addEventListener('change',()=>load().catch(e=>message(e.message,true)));
   el('newSection').addEventListener('click', () => form());

@@ -15,9 +15,16 @@ public class TeacherSelectionService {
         return ds.getReviewRecords().stream().anyMatch(r -> Objects.equals(appId,r.getApplicationId())
                 && Set.of("approve","not_selected").contains(r.getAction()));
     }
+    private static boolean maySelect(DataStore ds, User user, Application app) {
+        Job job=ds.getJobs().stream().filter(j -> Objects.equals(j.getId(),app.getJobId())).findFirst().orElse(null);
+        if(job==null || !ReviewAccess.can(user,"review.read")) return false;
+        com.tamo.model.Module module=ReviewAccess.module(ds,job);
+        return ReviewAccess.canWrite(user,module,"review.approve")
+                && ReviewAccess.canWrite(user,module,ReviewAccess.MANAGE_ASSIGNMENTS);
+    }
+
     public static void addCapabilities(JsonObject row,DataStore ds,User user,Application app) {
-        row.addProperty("canSelectTa",Set.of("organiser","admin").contains(user.getRole())
-                && ReviewAccess.can(user,"review.read") && ReviewAccess.can(user,"review.approve")
+        row.addProperty("canSelectTa",maySelect(ds,user,app)
                 && Set.of("applied","review","interview","shortlisted").contains(app.getStatus()==null?"":app.getStatus())
                 && !hasDecision(ds,app.getId()) && !SectionAssignmentService.activeForApplication(ds,app.getId()));
         ds.getSectionAssignments().stream().filter(a -> Objects.equals(app.getId(),a.getApplicationId())
@@ -35,12 +42,10 @@ public class TeacherSelectionService {
     }
     private JsonObject perform(JsonDataService target,String userId,String applicationId,JsonObject body) {
         DataStore ds=target.getData();User user=ReviewAccess.user(ds,userId);
-        if(!Set.of("organiser","admin").contains(user.getRole()) || !ReviewAccess.can(user,"review.read") || !ReviewAccess.can(user,"review.approve"))
-            throw new QualificationService.Problem(403,"TA selection requires current application view and decision permission.");
         Application app=ds.getApplications().stream().filter(a -> Objects.equals(applicationId,a.getId())).findFirst()
                 .orElseThrow(() -> new QualificationService.Problem(404,"Application not found."));
-        // row checks current course ownership before any application state is disclosed.
-        new ReviewService(target).row(user,app);
+        if(!maySelect(ds,user,app))
+            throw new QualificationService.Problem(403,"TA selection requires decision and assignment access for this course.");
         if(hasDecision(ds,applicationId) || SectionAssignmentService.activeForApplication(ds,applicationId)
                 || !Set.of("applied","review","interview","shortlisted").contains(app.getStatus()==null?"":app.getStatus()))
             throw new QualificationService.Problem(409,"This application already has a decision or is no longer awaiting selection. Review its current decision and assignments.");
@@ -51,6 +56,7 @@ public class TeacherSelectionService {
         JsonObject approval=new JsonObject();approval.addProperty("action","approve");approval.addProperty("sectionId",section);approval.addProperty("note",note);
         new ReviewService(target).record(userId,applicationId,approval);
         JsonObject assignment=body.deepCopy();assignment.addProperty("applicationId",applicationId);
+        if("admin".equals(user.getRole())) assignment.addProperty("reason",note);
         try {
             SectionAssignment draft=new SectionAssignmentService(target).assign(userId,user.getRole(),assignment);
             JsonObject result=new JsonObject();result.addProperty("applicationId",applicationId);result.addProperty("assignmentId",draft.getId());result.addProperty("publicationStatus",draft.getPublicationStatus());return result;

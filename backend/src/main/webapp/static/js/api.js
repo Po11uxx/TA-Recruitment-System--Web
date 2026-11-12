@@ -13,10 +13,10 @@ async function request(url, options = {}) {
 }
 
 const authApi = {
-  login: (email, password, role) =>
-    request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role }) }),
-  signup: (name, email, password, role) =>
-    request('/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password, role: role || 'applicant' }) }),
+  login: (email, password) =>
+    request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  signup: (name, email, password) =>
+    request('/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password, role: 'applicant' }) }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   me: () => request('/auth/me'),
 };

@@ -3,4 +3,4 @@
 <jsp:include page="/common/layout-top.jsp"/>
 <jsp:include page="/common/course-sections-content.jsp"/>
 <jsp:include page="/common/layout-bottom.jsp"/>
-<script src="<%= request.getContextPath() %>/static/js/course-sections.js"></script>
+<script src="<%= request.getContextPath() %>/static/js/course-sections.js?v=course-access-1"></script>

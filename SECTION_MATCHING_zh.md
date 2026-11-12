@@ -1,6 +1,6 @@
 # Section 时间匹配
 
-Organiser 登录后，在 **Recruitment Pipeline** 中使用课程、Section、Time matching 和申请周期筛选。点击申请人查看摘要，或进入完整申请页面查看每个 Section 的上课时间及具体冲突。
+Organiser 登录后，在 **Application Pipeline** 中使用课程、Section、Time matching 和申请周期筛选。点击申请人查看摘要，或进入完整申请页面查看每个 Section 的上课时间及具体冲突。
 
 - **Available**：申请时提交的可用时间覆盖该 Section 的全部上课时段，且没有明确冲突。
 - **Time conflict**：标出不在可用时间内或与明确冲突重叠的星期、起止时间。学生声明完全不可用时，也显示冲突。

@@ -25,7 +25,6 @@ public class DatabaseTransactionFilter implements Filter {
         synchronized (data.requestLock()) {
             boolean active = false;
             try {
-                data.processAssignmentExpiry();
                 data.beginRequest();
                 active = true;
                 chain.doFilter(request, buffered);

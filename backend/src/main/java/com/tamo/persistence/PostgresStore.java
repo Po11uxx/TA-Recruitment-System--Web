@@ -126,6 +126,7 @@ public final class PostgresStore {
                 applySponsorSchema();
                 applyAvailabilityEvidenceSchema();
                 applyJobSectionsSchema();
+                applyOptionalReplySchema();
                 load();
                 save(source);
                 try (Statement stmt = connection.createStatement()) {
@@ -146,6 +147,7 @@ public final class PostgresStore {
                 applySponsorSchema();
                 applyAvailabilityEvidenceSchema();
                 applyJobSectionsSchema();
+                applyOptionalReplySchema();
             }
             finishPeriodMigration();
             finishReviewMigration(installed);
@@ -199,6 +201,17 @@ public final class PostgresStore {
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
                 stmt.executeUpdate("INSERT INTO tamo_schema_version(version) VALUES (3)");
+            }
+        }
+    }
+
+    private void applyOptionalReplySchema() throws SQLException, IOException {
+        try (Statement stmt=connection.createStatement(); ResultSet rs=stmt.executeQuery("SELECT 1 FROM tamo_schema_version WHERE version=15")) { if(rs.next()) return; }
+        try (var stream=PostgresStore.class.getResourceAsStream("/db/V15__optional_assignment_reply.sql")) {
+            if(stream==null) throw new IOException("Missing migration V15");
+            try (Statement stmt=connection.createStatement()) {
+                stmt.execute(new String(stream.readAllBytes(),StandardCharsets.UTF_8));
+                stmt.executeUpdate("INSERT INTO tamo_schema_version(version) VALUES(15)");
             }
         }
     }

@@ -95,21 +95,36 @@ class PostgresStoreTest {
         com.google.gson.JsonObject reply=new com.google.gson.JsonObject();reply.addProperty("decision","accept");service.respond("u002","applicant",accepted.getId(),reply);
         store.save(ds);store.commit();store.close();
         try(Connection conn=DriverManager.getConnection(url,user,password);Statement stmt=conn.createStatement()) {
-            stmt.execute("ALTER TABLE section_assignments DROP COLUMN response_deadline CASCADE, DROP COLUMN expired_at CASCADE");stmt.execute("DELETE FROM tamo_schema_version WHERE version=7");
+            stmt.execute("ALTER TABLE section_assignments DROP COLUMN response_deadline CASCADE, DROP COLUMN expired_at CASCADE");stmt.execute("DELETE FROM tamo_schema_version WHERE version IN (7,15)");
         }
         Files.writeString(seed,"do not reimport");java.time.Instant before=java.time.Instant.now();store.initialize(seed,temp.resolve("backups"));store.begin();DataStore upgraded=store.load();
         SectionAssignment p=upgraded.getSectionAssignments().stream().filter(a->a.getId().equals(pending.getId())).findFirst().orElseThrow();
         assertEquals("pending",p.getResponseStatus());java.time.Instant deadline=java.time.Instant.parse(p.getResponseDeadline());assertTrue(deadline.isAfter(before.plusSeconds(6*86400)));assertTrue(deadline.isBefore(java.time.Instant.now().plusSeconds(8*86400)));
-        SectionAssignment a=upgraded.getSectionAssignments().stream().filter(x->x.getId().equals(accepted.getId())).findFirst().orElseThrow();assertEquals("accepted",a.getResponseStatus());assertNull(a.getResponseDeadline());assertEquals(0,assignmentService(upgraded).expireDueAssignments());
+        SectionAssignment a=upgraded.getSectionAssignments().stream().filter(x->x.getId().equals(accepted.getId())).findFirst().orElseThrow();assertEquals("accepted",a.getResponseStatus());assertNull(a.getResponseDeadline());
     }
-    @Test void expiryPersistsEvenWhenFollowingLateReplyTransactionRollsBack() throws Exception {
+    @Test void publicationWithoutDeadlineAndLegacyReplyPersistAcrossReconnect() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");var service=assignmentService(ds);
-        SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),deadlineBody());a.setResponseDeadline("2020-01-01T00:00:00Z");
+        SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),new com.google.gson.JsonObject());assertNull(a.getResponseDeadline());
         store.save(ds);store.commit();store.close();
-        store.begin();DataStore maintenance=store.load();assertEquals(1,assignmentService(maintenance).expireDueAssignments());store.save(maintenance);store.commit();store.close();
-        store.begin();DataStore request=store.load();com.google.gson.JsonObject reply=new com.google.gson.JsonObject();reply.addProperty("decision","accept");
-        assertEquals(409,assertThrows(com.tamo.service.SectionAssignmentService.Problem.class,()->assignmentService(request).respond("u001","applicant",a.getId(),reply)).status);store.close();
-        store.begin();DataStore actual=store.load();SectionAssignment expired=actual.getSectionAssignments().get(0);assertEquals("expired",expired.getResponseStatus());assertEquals("cancelled",expired.getStatus());assertNotNull(expired.getExpiredAt());assertNull(expired.getRespondedAt());assertEquals(0,assignmentService(actual).occupied(a.getSectionId(),a.getPeriodId()));assertEquals(0,assignmentService(actual).expireDueAssignments());assertEquals(2,actual.getNotifications().stream().filter(n->"assignment_expired".equals(n.getType())&&a.getId().equals(n.getRelatedId())).count());
+        store.begin();DataStore pending=store.load();SectionAssignment row=pending.getSectionAssignments().get(0);assertEquals("pending",row.getResponseStatus());assertNull(row.getResponseDeadline());
+        row.setResponseDeadline("2020-01-01T00:00:00Z");store.save(pending);store.commit();store.close();
+        store.begin();DataStore replyData=store.load();com.google.gson.JsonObject reply=new com.google.gson.JsonObject();reply.addProperty("decision","accept");
+        assignmentService(replyData).respond("u001","applicant",a.getId(),reply);store.save(replyData);store.commit();store.close();
+        store.begin();DataStore actual=store.load();SectionAssignment accepted=actual.getSectionAssignments().get(0);assertEquals("accepted",accepted.getResponseStatus());assertEquals("active",accepted.getStatus());assertNotNull(accepted.getRespondedAt());assertEquals(1,assignmentService(actual).occupied(a.getSectionId(),a.getPeriodId()));
+    }
+
+    @Test void v15RemovesMandatoryDeadlineWithoutDeletingLegacyMetadata() throws Exception {
+        store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");var service=assignmentService(ds);
+        SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),new com.google.gson.JsonObject());a.setResponseDeadline("2020-01-01T00:00:00Z");
+        store.save(ds);store.commit();store.close();
+        try(Connection conn=DriverManager.getConnection(url,user,password);Statement stmt=conn.createStatement()) {
+            stmt.execute("ALTER TABLE section_assignments ADD CONSTRAINT assignment_pending_deadline CHECK (status <> 'active' OR publication_status <> 'published' OR response_status <> 'pending' OR response_deadline IS NOT NULL)");
+            stmt.execute("DELETE FROM tamo_schema_version WHERE version=15");
+            assertThrows(SQLException.class,()->stmt.executeUpdate("UPDATE section_assignments SET response_deadline=NULL"));
+        }
+        store.initialize(seed,temp.resolve("backups"));store.begin();DataStore upgraded=store.load();SectionAssignment retained=upgraded.getSectionAssignments().get(0);assertEquals("2020-01-01T00:00:00Z",retained.getResponseDeadline());assertEquals("pending",retained.getResponseStatus());
+        retained.setResponseDeadline(null);store.save(upgraded);store.commit();store.close();
+        store.begin();assertNull(store.load().getSectionAssignments().get(0).getResponseDeadline());
     }
 
     @Test void upgradesExistingV5AssignmentsAsUnpublishedWithoutSendingNotifications() throws Exception {

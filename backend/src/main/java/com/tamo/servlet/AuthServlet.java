@@ -76,7 +76,6 @@ public class AuthServlet extends HttpServlet {
         JsonObject body = JsonUtil.readRequestBodyAsJson(req);
         String email = body.has("email") ? body.get("email").getAsString() : null;
         String password = body.has("password") ? body.get("password").getAsString() : null;
-        String role = body.has("role") ? body.get("role").getAsString() : null;
 
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             JsonUtil.writeError(resp, 400, "Missing required fields");
@@ -86,11 +85,6 @@ public class AuthServlet extends HttpServlet {
         User user = authService.findByEmailAndPassword(email, password);
         if (user == null) {
             JsonUtil.writeError(resp, 401, "Invalid email or password");
-            return;
-        }
-
-        if (role != null && !role.isBlank() && !user.getRole().equals(role)) {
-            JsonUtil.writeError(resp, 403, "Role mismatch");
             return;
         }
 

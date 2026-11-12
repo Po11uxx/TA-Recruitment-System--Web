@@ -821,7 +821,7 @@ public class AdminService {
                 job.setStatus("active");
                 dataService.save();
                 result.put("success", true);
-                result.put("message", "Offer revoked and job reopened for recruitment");
+                result.put("message", "Offer revoked and job reopened for application");
                 return result;
             }
             case "transfer" -> {

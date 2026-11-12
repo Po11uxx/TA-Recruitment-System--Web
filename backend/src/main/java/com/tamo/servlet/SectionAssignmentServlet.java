@@ -29,7 +29,7 @@ public class SectionAssignmentServlet extends HttpServlet {
             else { JsonUtil.writeError(resp,404,"Endpoint not found"); return; }
             data.addLog("TA Assignment "+action,"info",(String)req.getSession().getAttribute("userName"),user(req),
                     action+" assignment "+a.getId()+" application "+a.getApplicationId()+" section "+a.getSectionId()+" period "+a.getPeriodId(),req.getRemoteAddr());
-            JsonUtil.writeJson(resp,"applicant".equals(role(req))?service.studentView(a):a);
+            JsonUtil.writeJson(resp,"applicant".equals(role(req))?service.studentView(a):service.staffView(a));
         } catch (SectionAssignmentService.Problem e) { JsonUtil.writeError(resp,e.status,e.getMessage()); }
         catch (JsonParseException e) { JsonUtil.writeError(resp,400,"Invalid JSON request."); }
     }

@@ -60,6 +60,23 @@ body { font-family: 'Inter', system-ui, sans-serif; }
 .input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.12); }
 .input::placeholder { color: #7c9bbf; }
 
+/* Keep native keyboard/menu behavior with a consistently inset chevron. */
+select:not([multiple]):not([size]) {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 2.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23526f93' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  background-size: 1.125rem 1.125rem;
+  cursor: pointer;
+}
+select:disabled { cursor: not-allowed; opacity: 0.65; }
+@media (forced-colors: active) {
+  select:not([multiple]):not([size]) { appearance: auto; background-image: none; }
+}
+
+
 .stat-icon {
   height: 3rem; width: 3rem; border-radius: 9999px;
   background: #dbeafe; display: flex; align-items: center; justify-content: center;
@@ -77,6 +94,13 @@ body { font-family: 'Inter', system-ui, sans-serif; }
 .timeline-dot.pending { border-color: #15345b; color: #15345b; }
 .timeline-dot.error { border-color: #ef4444; background: #ef4444; color: white; }
 
+.pipeline-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+.pipeline-board .kanban-card { overflow-wrap: anywhere; }
 .kanban-col { min-height: 200px; }
 .kanban-card { cursor: grab; transition: box-shadow 0.15s; }
 .kanban-card:active { cursor: grabbing; }
@@ -286,3 +310,24 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--brand-primary)
   #navbar { padding-left:1.25rem; padding-right:1.25rem; }
   #navbar > div:last-child { gap:1rem; }
 }
+
+/* The week can scroll in either direction without moving its headers. */
+#availabilityFields { min-inline-size: 0; }
+.availability-grid-scroll { max-width: 100%; max-height: 30rem; overflow: auto; border: 1px solid #d5e3f5; border-radius: .75rem; }
+.availability-grid { --availability-tick: 20px; width: 100%; min-width: 36rem; table-layout: fixed; border-spacing: 0; }
+.availability-grid th { background: #eff6ff; font-size: .75rem; }
+.availability-grid thead th { position: sticky; top: 0; z-index: 4; padding: .55rem; }
+.availability-grid th:first-child { width: 4.5rem; }
+.availability-grid tbody th { position: sticky; left: 0; z-index: 3; vertical-align: top; }
+.availability-grid tbody tr { height: var(--availability-tick); }
+.availability-grid td { position: relative; padding: 0; background: white; }
+.availability-grid tbody th, .availability-grid td { border-top: 1px solid #e5e7eb; }
+.availability-grid td { border-left: 1px solid #d5e3f5; }
+.availability-grid .availability-half-hour > * { border-top-color: #aebccc; }
+.availability-grid .availability-hour > * { border-top-color: #869bb4; }
+.availability-grid td button { position: absolute; inset: 0; width: 100%; border: 0; background: transparent; z-index: 2; }
+.availability-grid td button:not(:disabled) { cursor: crosshair; }
+.availability-grid td button:not(:disabled):hover { background: #eff6ff88; }
+.availability-grid td button[aria-pressed="true"] { border-top: 2px solid #2563eb; background: #dbeafe88; }
+.availability-grid td button:focus-visible { outline: 2px solid #2563eb; outline-offset: -2px; }
+.availability-block { position: absolute; left: .15rem; right: .15rem; z-index: 1; pointer-events: none; border-radius: .3rem; background: #bfdbfe; border: 1px solid #60a5fa; color: #15345b; padding: .1rem .3rem; font-size: .75rem; overflow: hidden; }

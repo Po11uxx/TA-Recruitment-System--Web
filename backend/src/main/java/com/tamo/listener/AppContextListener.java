@@ -12,11 +12,6 @@ import jakarta.servlet.annotation.WebListener;
  * Provides necessary operations and logic for the system.
  */
 public class AppContextListener implements ServletContextListener {
-    private java.util.concurrent.ScheduledExecutorService expiryWorker;
-    @Override public void contextDestroyed(ServletContextEvent sce) {
-        if(expiryWorker!=null) expiryWorker.shutdownNow();
-    }
-
     @Override
     /**
      * Executes the contextInitialized operation.
@@ -28,14 +23,6 @@ public class AppContextListener implements ServletContextListener {
      */
     public void contextInitialized(ServletContextEvent sce) {
         JsonDataService.ensureInitialized(JsonDataService.resolveClassesPath(sce.getServletContext()));
-
-        expiryWorker=java.util.concurrent.Executors.newSingleThreadScheduledExecutor(task->{
-            Thread thread=new Thread(task,"assignment-expiry");thread.setDaemon(true);return thread;
-        });
-        expiryWorker.scheduleWithFixedDelay(()->{
-            try {JsonDataService.getInstance().processAssignmentExpiry();}
-            catch(Exception e){sce.getServletContext().log("Assignment expiry check failed; will retry.",e);}
-        },0,15,java.util.concurrent.TimeUnit.SECONDS);
 
         String imagesPath = sce.getServletContext().getRealPath("/static/images");
         if (imagesPath == null) {

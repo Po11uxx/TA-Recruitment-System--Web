@@ -37,8 +37,27 @@ class SectionAssignmentServiceTest {
         // Stale posting metadata must not remove authority from the current course owner.
         ds.getJobs().get(0).setOrganiserId("u006");assertEquals("active",assign().getStatus());
     }
-    @Test void adminCanManageAllCourses() { assertEquals("active",service.assign("u010","admin",body(app,section)).getStatus()); }
-    @Test void applicationMustBelongToSectionCourse() {section.setModuleId("m002");fails(403,()->service.assign("u010","admin",body(app,section)));}
+    @Test void adminReadsAssignmentsAndNeedsCourseGrantToWrite() {
+        User admin=ReviewAccess.user(ds,"u010");
+        assertTrue(service.list("u010","admin").getAsJsonArray("manageableCourseIds").isEmpty());
+        fails(403,()->service.assign("u010","admin",body(app,section)));
+        admin.setPermissions(java.util.List.of(ReviewAccess.MANAGE_ASSIGNMENTS));
+        admin.setCourseIds(java.util.List.of("m002"));
+        fails(403,()->service.assign("u010","admin",body(app,section)));
+        admin.setCourseIds(java.util.List.of("m001"));
+        JsonObject delegated=body(app,section);
+        fails(400,()->service.assign("u010","admin",delegated));
+        delegated.addProperty("reason","Covering for the assigned Teacher");
+        SectionAssignment assignment=service.assign("u010","admin",delegated);
+        fails(400,()->service.publish("u010","admin",assignment.getId(),new JsonObject()));
+        assertEquals("published",service.publish("u010","admin",assignment.getId(),delegated).getPublicationStatus());
+        verify(data,times(2)).addLog(eq("Delegated TA Assignment"),eq("info"),isNull(),eq("u010"),contains("Covering for the assigned Teacher"),isNull());
+        admin.setPermissions(java.util.List.of());
+        fails(403,()->service.publish("u010","admin",assignment.getId(),new JsonObject()));
+        fails(403,()->service.cancel("u010","admin",assignment.getId(),new JsonObject()));
+        assertEquals(1,service.list("u010","admin").getAsJsonArray("assignments").size());
+    }
+    @Test void applicationMustBelongToSectionCourse() {section.setModuleId("m002");User admin=ReviewAccess.user(ds,"u010");admin.setPermissions(java.util.List.of(ReviewAccess.MANAGE_ASSIGNMENTS));admin.setCourseIds(java.util.List.of("m002"));fails(403,()->service.assign("u010","admin",body(app,section)));}
     @Test void zeroCapacityAndArchivedAreRejected() {section.setTaPositions(0);fails(409,this::assign);section.setTaPositions(1);section.setStatus("archived");fails(409,this::assign);}
     @Test void duplicateAndFullCapacityAreRejected() {
         assign();fails(409,this::assign);
@@ -81,7 +100,7 @@ class SectionAssignmentServiceTest {
         fails(409,()->service.cancel("u005","organiser",a.getId(),reason()));assertNotEquals(a.getId(),assign().getId());assertEquals(2,ds.getSectionAssignments().size());
     }
     @Test void studentsSeeOnlyOwnRowsAndNoStaffConfirmationNote() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());a.setManualConfirmationNote("Private staff confirmation");
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());a.setManualConfirmationNote("Private staff confirmation");
         JsonObject own=service.list("u001","applicant");assertEquals(1,own.getAsJsonArray("assignments").size());
         assertFalse(own.getAsJsonArray("assignments").get(0).getAsJsonObject().has("manualConfirmationNote"));assertFalse(own.has("candidates"));
         assertTrue(service.list("u002","applicant").getAsJsonArray("assignments").isEmpty());assertTrue(service.list("u006","organiser").getAsJsonArray("assignments").isEmpty());
@@ -102,7 +121,7 @@ class SectionAssignmentServiceTest {
         assertEquals(409,new OrganiserService(data).deleteJob("u005",app.getJobId()).get("code"));assertTrue(ds.getApplications().contains(app));
     }
     @Test void ownershipTransferMovesManagementToNewOwnerButKeepsStudentVisibility() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());ds.getModules().get(0).setOrganiserId("u006");
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());ds.getModules().get(0).setOrganiserId("u006");
         assertTrue(service.list("u005","organiser").getAsJsonArray("assignments").isEmpty());fails(403,()->service.cancel("u005","organiser",a.getId(),reason()));
         assertEquals(1,service.list("u001","applicant").getAsJsonArray("assignments").size());service.cancel("u006","organiser",a.getId(),reason());
     }
@@ -112,25 +131,25 @@ class SectionAssignmentServiceTest {
         SectionAssignment a=assign();int before=ds.getNotifications().size();
         assertEquals("draft",a.getPublicationStatus());assertTrue(service.list("u001","applicant").getAsJsonArray("assignments").isEmpty());
         assertEquals(1,service.occupied(section.getId(),"period_test"));assertEquals(0,service.acceptedWeeklyHours("u001","period_test"));
-        fails(403,()->service.publish("u006","organiser",a.getId(),deadlineBody()));fails(403,()->service.publish("u001","applicant",a.getId(),deadlineBody()));
-        service.publish("u005","organiser",a.getId(),deadlineBody());assertEquals("published",a.getPublicationStatus());assertNotNull(a.getPublishedAt());
+        fails(403,()->service.publish("u006","organiser",a.getId(),publicationBody()));fails(403,()->service.publish("u001","applicant",a.getId(),publicationBody()));
+        service.publish("u005","organiser",a.getId(),publicationBody());assertEquals("published",a.getPublicationStatus());assertNotNull(a.getPublishedAt());
         assertEquals(before+1,ds.getNotifications().size());Notification n=ds.getNotifications().get(before);assertEquals("u001",n.getUserId());assertEquals(a.getId(),n.getRelatedId());assertEquals("assignment_published",n.getType());
-        fails(409,()->service.publish("u005","organiser",a.getId(),deadlineBody()));assertEquals(before+1,ds.getNotifications().size());
+        fails(409,()->service.publish("u005","organiser",a.getId(),publicationBody()));assertEquals(before+1,ds.getNotifications().size());
     }
     @Test void onlyOwnerCanReplyToPublishedPendingAssignment() {
         SectionAssignment a=assign();fails(404,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));
-        service.publish("u005","organiser",a.getId(),deadlineBody());fails(404,()->service.respond("u002","applicant",a.getId(),decision("accept",null)));
+        service.publish("u005","organiser",a.getId(),publicationBody());fails(404,()->service.respond("u002","applicant",a.getId(),decision("accept",null)));
         fails(403,()->service.respond("u005","organiser",a.getId(),decision("accept",null)));assertEquals("pending",a.getResponseStatus());
     }
     @Test void acceptanceRecordsTimeAndCountsOnlyAcceptedHours() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());int before=ds.getNotifications().size();
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());int before=ds.getNotifications().size();
         service.respond("u001","applicant",a.getId(),decision("accept",null));assertEquals("accepted",a.getResponseStatus());assertNotNull(a.getRespondedAt());assertEquals("active",a.getStatus());
         assertEquals(8.5,service.acceptedWeeklyHours("u001","period_test"));assertEquals(1,service.occupied(section.getId(),"period_test"));
         assertEquals(before+1,ds.getNotifications().size());assertEquals("u005",ds.getNotifications().get(before).getUserId());
         fails(409,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));fails(409,()->service.respond("u001","applicant",a.getId(),decision("decline","Changed mind")));assertEquals(before+1,ds.getNotifications().size());
     }
     @Test void declineRequiresReasonReleasesPositionAndKeepsResponseOnReassignment() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());
         fails(400,()->service.respond("u001","applicant",a.getId(),decision("decline","  ")));assertEquals("active",a.getStatus());assertEquals("pending",a.getResponseStatus());
         service.respond("u001","applicant",a.getId(),decision("decline","Schedule changed"));
         assertEquals("declined",a.getResponseStatus());assertEquals("cancelled",a.getStatus());assertEquals("u001",a.getCancelledBy());assertEquals("Schedule changed",a.getResponseReason());
@@ -139,82 +158,70 @@ class SectionAssignmentServiceTest {
         assertEquals(1,service.list("u001","applicant").getAsJsonArray("assignments").size());
     }
     @Test void invalidResponseHasNoPartialMutationOrNotification() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());int before=ds.getNotifications().size();
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());int before=ds.getNotifications().size();
         fails(400,()->service.respond("u001","applicant",a.getId(),decision("other",null)));
         fails(400,()->service.respond("u001","applicant",a.getId(),decision("decline","x".repeat(1001))));
         fails(400,()->service.respond("u001","applicant",a.getId(),null));assertNull(a.getRespondedAt());assertEquals("pending",a.getResponseStatus());assertEquals(before,ds.getNotifications().size());
     }
     @Test void cancelledPublishedOfferCannotBeRepliedToOrRepublishedAndNotifiesStudent() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());int before=ds.getNotifications().size();
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());int before=ds.getNotifications().size();
         service.cancel("u005","organiser",a.getId(),reason());assertEquals(before+1,ds.getNotifications().size());assertEquals("assignment_cancelled",ds.getNotifications().get(before).getType());
-        fails(409,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));fails(409,()->service.publish("u005","organiser",a.getId(),deadlineBody()));
+        fails(409,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));fails(409,()->service.publish("u005","organiser",a.getId(),publicationBody()));
     }
     @Test void cancellingAcceptedOfferRetainsAcceptanceButRemovesAcceptedWorkload() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());service.respond("u001","applicant",a.getId(),decision("accept",null));String acceptedAt=a.getRespondedAt();
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());service.respond("u001","applicant",a.getId(),decision("accept",null));String acceptedAt=a.getRespondedAt();
         service.cancel("u005","organiser",a.getId(),reason());assertEquals("accepted",a.getResponseStatus());assertEquals(acceptedAt,a.getRespondedAt());assertEquals(0,service.acceptedWeeklyHours("u001","period_test"));
     }
     @Test void draftsDoNotLeakThroughStudentTotalsAndStaffSeesReservedAndAcceptedSeparately() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());
         CourseSection other=section("another","m001","12:00","13:00");ds.getCourseSections().add(other);service.assign("u005","organiser",body(app,other));
         JsonObject row=service.list("u001","applicant").getAsJsonArray("assignments").get(0).getAsJsonObject();assertEquals(8.5,row.get("weeklyHoursTotal").getAsDouble());assertFalse(row.has("publishedBy"));assertEquals(17,service.weeklyHours("u001","period_test"));
         service.respond("u001","applicant",a.getId(),decision("accept",null));assertEquals(8.5,service.acceptedWeeklyHours("u001","period_test"));
     }
     @Test void replyNotifiesCurrentCourseOwnerAfterTransfer() {
-        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineBody());ds.getModules().get(0).setOrganiserId("u006");int before=ds.getNotifications().size();
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),publicationBody());ds.getModules().get(0).setOrganiserId("u006");int before=ds.getNotifications().size();
         service.respond("u001","applicant",a.getId(),decision("decline","Unable to attend"));assertEquals("u006",ds.getNotifications().get(before).getUserId());
     }
     @Test void draftCancellationIsSilentAndCannotBePublished() {
-        SectionAssignment a=assign();int before=ds.getNotifications().size();service.cancel("u005","organiser",a.getId(),reason());assertEquals(before,ds.getNotifications().size());fails(409,()->service.publish("u005","organiser",a.getId(),deadlineBody()));
+        SectionAssignment a=assign();int before=ds.getNotifications().size();service.cancel("u005","organiser",a.getId(),reason());assertEquals(before,ds.getNotifications().size());fails(409,()->service.publish("u005","organiser",a.getId(),publicationBody()));
     }
-    private com.google.gson.JsonObject deadlineBody() {
-        com.google.gson.JsonObject b=new com.google.gson.JsonObject();b.addProperty("responseDeadline",java.time.Instant.now().plusSeconds(86400).toString());return b;
+    private com.google.gson.JsonObject publicationBody() {
+        return new JsonObject();
     }
     private void at(String instant) {service=new SectionAssignmentService(data,java.time.Clock.fixed(java.time.Instant.parse(instant),java.time.ZoneOffset.UTC));}
-    private JsonObject deadlineAt(String instant) {JsonObject b=new JsonObject();b.addProperty("responseDeadline",instant);return b;}
-    @Test void publishingRequiresAnExplicitFutureDeadlineWithoutPartialChanges() {
-        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();int notes=ds.getNotifications().size();
-        fails(400,()->service.publish("u005","organiser",a.getId(),new JsonObject()));
-        for(String bad:List.of("not a date","2026-10-16T12:00:00","2026-10-16T12:00:00Z","2026-10-15T12:00:00Z")) fails(400,()->service.publish("u005","organiser",a.getId(),deadlineAt(bad)));
-        assertEquals("draft",a.getPublicationStatus());assertNull(a.getResponseDeadline());assertEquals(notes,ds.getNotifications().size());
-        service.publish("u005","organiser",a.getId(),deadlineAt("2026-10-16T06:00:00-07:00"));assertEquals("2026-10-16T13:00:00Z",a.getResponseDeadline());
+    @Test void clientDeadlineFieldsAreIgnoredWhenPublishing() {
+        SectionAssignment a=assign();JsonObject body=new JsonObject();body.addProperty("responseDeadline","not a date");
+        service.publish("u005","organiser",a.getId(),body);assertNull(a.getResponseDeadline());assertEquals("published",a.getPublicationStatus());
     }
-    @Test void expiryIsExactAtDeadlineIdempotentAndReleasesCapacity() {
-        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineAt("2026-10-16T13:00:00Z"));int notes=ds.getNotifications().size();
-        at("2026-10-16T12:59:59.999Z");assertEquals(0,service.expireDueAssignments());assertEquals("active",a.getStatus());
-        at("2026-10-16T13:00:00Z");assertEquals(1,service.expireDueAssignments());assertEquals("expired",a.getResponseStatus());assertEquals("cancelled",a.getStatus());assertEquals("system",a.getCancelledBy());assertNotNull(a.getExpiredAt());assertNull(a.getRespondedAt());
-        assertEquals(0,service.occupied(section.getId(),app.getPeriodId()));assertEquals(0,service.weeklyHours(app.getApplicantId(),app.getPeriodId()));
-        assertEquals(notes+2,ds.getNotifications().size());assertEquals(0,service.expireDueAssignments());assertEquals(notes+2,ds.getNotifications().size());
-        assertEquals("draft",assign().getPublicationStatus());
+    @Test void pendingReplyRetainsCapacityUntilExplicitCancellation() {
+        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),new JsonObject());
+        at("2027-10-16T12:00:00Z");service.list("u001","applicant");assertEquals("pending",a.getResponseStatus());assertEquals("active",a.getStatus());assertEquals(1,service.occupied(section.getId(),app.getPeriodId()));
+        service.cancel("u005","organiser",a.getId(),reason());assertEquals(0,service.occupied(section.getId(),app.getPeriodId()));
     }
-    @Test void lateRepliesAreRejectedEvenBeforeMaintenanceRuns() {
-        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineAt("2026-10-16T13:00:00Z"));
-        at("2026-10-16T13:00:00Z");fails(409,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));
-        fails(409,()->service.respond("u001","applicant",a.getId(),decision("decline","Late reply")));assertEquals("pending",a.getResponseStatus());assertNull(a.getRespondedAt());
-        service.expireDueAssignments();fails(409,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));fails(409,()->service.publish("u005","organiser",a.getId(),deadlineBody()));
-    }
-    @Test void acceptedRepliesBeforeDeadlineNeverExpire() {
-        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineAt("2026-10-16T13:00:00Z"));
-        at("2026-10-16T12:59:59.999Z");service.respond("u001","applicant",a.getId(),decision("accept",null));
-        at("2026-10-17T12:00:00Z");assertEquals(0,service.expireDueAssignments());assertEquals("accepted",a.getResponseStatus());assertEquals("active",a.getStatus());assertEquals(8.5,service.acceptedWeeklyHours("u001","period_test"));
-    }
-    @Test void declinedCancelledAndDraftRowsDoNotExpireOrNotifyAgain() {
-        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();a.setResponseDeadline("2026-10-15T12:00:00Z");assertEquals(0,service.expireDueAssignments());
-        service.publish("u005","organiser",a.getId(),deadlineAt("2026-10-16T13:00:00Z"));service.respond("u001","applicant",a.getId(),decision("decline","Other plans"));
-        int notes=ds.getNotifications().size();at("2026-10-17T12:00:00Z");assertEquals(0,service.expireDueAssignments());assertEquals(notes,ds.getNotifications().size());assertEquals("declined",a.getResponseStatus());
-    }
-    @Test void expiryNotifiesStudentAndCurrentOwnerAndIsVisibleAsHistory() {
-        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),deadlineAt("2026-10-16T13:00:00Z"));ds.getModules().get(0).setOrganiserId("u006");int notes=ds.getNotifications().size();
-        at("2026-10-16T14:00:00Z");service.expireDueAssignments();assertEquals(Set.of("u001","u006"),new HashSet<>(ds.getNotifications().subList(notes,ds.getNotifications().size()).stream().map(Notification::getUserId).toList()));
-        JsonObject row=service.list("u001","applicant").getAsJsonArray("assignments").get(0).getAsJsonObject();assertEquals("expired",row.get("responseStatus").getAsString());assertTrue(row.has("expiredAt"));assertTrue(row.has("responseDeadline"));assertEquals(0,row.get("weeklyHoursTotal").getAsDouble());
+    @Test void historicalExpiredCancellationStaysCancelledAndCannotBeRepliedTo() {
+        SectionAssignment a=assign();a.setPublicationStatus("published");a.setResponseDeadline("2020-01-01T00:00:00Z");a.setStatus("cancelled");a.setResponseStatus("expired");a.setExpiredAt("2020-01-01T00:00:00Z");
+        fails(409,()->service.respond("u001","applicant",a.getId(),decision("accept",null)));fails(409,()->service.publish("u005","organiser",a.getId(),new JsonObject()));
+        JsonObject row=service.list("u001","applicant").getAsJsonArray("assignments").get(0).getAsJsonObject();assertFalse(row.has("responseDeadline"));assertFalse(row.has("expiredAt"));assertEquals("cancelled",a.getStatus());
     }
     @Test void reportsUseAcceptedLedgerAndHideDraftHoursFromStudents() {
         SectionAssignment a=assign();AssignmentReportingService reporting=new AssignmentReportingService(ds);
         assertEquals(0,reporting.workload("u001","period_test",false).get("current").getAsDouble());assertEquals(0,reporting.workload("u001","period_test",false).get("reservedHours").getAsDouble());
         assertEquals(8.5,reporting.workload("u001","period_test",true).get("reservedHours").getAsDouble());
-        service.publish("u005","organiser",a.getId(),deadlineBody());assertEquals(0,reporting.workload("u001","period_test",false).get("current").getAsDouble());
+        service.publish("u005","organiser",a.getId(),publicationBody());assertEquals(0,reporting.workload("u001","period_test",false).get("current").getAsDouble());
         service.respond("u001","applicant",a.getId(),decision("accept",null));assertEquals(8.5,reporting.workload("u001","period_test",false).get("current").getAsDouble());
         assertEquals(0,reporting.workload("u001","other_period",false).get("current").getAsDouble());
         service.cancel("u005","organiser",a.getId(),reason());assertEquals(0,reporting.workload("u001","period_test",false).get("current").getAsDouble());
     }
  @Test void offerStatusAloneDoesNotBypassSelectionApproval(){ds.getReviewRecords().clear();fails(409,this::assign);assertTrue(ds.getSectionAssignments().isEmpty());}
+    @Test void publishWithoutDeadlineKeepsReplyPending() {
+        SectionAssignment a=assign();service.publish("u005","organiser",a.getId(),new JsonObject());
+        assertEquals("published",a.getPublicationStatus());assertEquals("pending",a.getResponseStatus());assertNull(a.getResponseDeadline());
+        assertTrue(ds.getNotifications().stream().noneMatch(n->n.getMessage()!=null&&n.getMessage().contains("before ")));
+    }
+    @Test void elapsedLegacyDeadlineDoesNotRejectStudentReplyOrReleasePosition() {
+        at("2026-10-16T12:00:00Z");SectionAssignment a=assign();a.setPublicationStatus("published");a.setResponseDeadline("2026-10-17T12:00:00Z");
+        at("2026-12-16T12:00:00Z");assertEquals(1,service.occupied(section.getId(),app.getPeriodId()));
+        service.respond("u001","applicant",a.getId(),decision("accept",null));
+        assertEquals("active",a.getStatus());assertEquals("accepted",a.getResponseStatus());assertEquals(1,service.occupied(section.getId(),app.getPeriodId()));
+    }
 }

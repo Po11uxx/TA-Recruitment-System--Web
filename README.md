@@ -1,6 +1,10 @@
+> Messages UI is temporarily removed. Internal review notes and system notifications remain available; backend messaging APIs and stored history are retained.
+
+> Placement workflow: **My TA Placement** shows course / Section arrangements and allows students to accept or decline. Publishing requires no reply deadline; pending placements remain reserved until a reply or an authorised cancellation. This is not daily teaching-task management.
+
 > Interview management has been removed. See [removal and compatibility notes](docs/interview-retirement.md); historical Version 1 documents and PDFs may describe the former workflow.
 
-> Current access policy: the primary role labels are **applicant**, **Teacher**, and **admin**. Teacher retains the internal `organiser` role key and routes. Reviewer, Decision-maker, and Viewer are explicitly advanced review roles; existing accounts and grants are preserved. Full CSV Import / Export, templates, previews, and the shared CSV API require an active **admin** account. Teacher has no CSV page or menu.
+> Current access policy: the primary role labels are **Applicant**, **Teacher**, and **admin**. Teacher retains the internal `organiser` role key and routes. Reviewer, Decision-maker, and Viewer are explicitly advanced review roles; existing accounts and grants are preserved. Full CSV Import / Export, templates, previews, and the shared CSV API require an active **admin** account. Teacher has no CSV page or menu.
 
 > Current baseline: **Version 1 (v1.0)**. See the [Version 1 release notes (Chinese)](VERSION_1_zh.md) for implemented changes, validation and limitations.
 
@@ -12,7 +16,7 @@
 
 [English](README.md)
 
-# TA&MO — TA Recruitment & Management System
+# TA&MO — TA Application & Management System
 
 <div align="center">
   <a href="http://47.93.90.208:8080/tamo" target="_blank">
@@ -23,7 +27,7 @@
 </div>
 <br>
 
-> University-oriented Teaching Assistant recruitment and management platform built with **Java Servlet/JSP** + **Embedded Tomcat**.
+> University-oriented Teaching Assistant application and management platform built with **Java Servlet/JSP** + **Embedded Tomcat**.
 
 > [!NOTE]
 > **📖 Looking for the User Manual?**
@@ -52,7 +56,7 @@
 
 ## Project Overview
 
-TA&MO is a full-stack web application designed for managing the Teaching Assistant recruitment lifecycle at a university. It provides a robust, role-based platform that streamlines the hiring process from start to finish.
+TA&MO is a full-stack web application designed for managing the Teaching Assistant application lifecycle at a university. It provides a robust, role-based platform that streamlines the hiring process from start to finish.
 
 | Role | Key Features |
 |------|-------------|
@@ -85,9 +89,8 @@ To get started, users must either log in to an existing account or sign up.
 Once logged in as an Applicant (TA), you have access to a suite of tools to find and secure jobs.
 - **Dashboard & Notifications**: Your landing page gives you a bird's-eye view of your active applications and recent notifications.
 - **Finding & Applying for Jobs**: Go to the "Find Jobs" tab to browse open module positions. Click on a job to view its details, and use the Apply modal to submit your application and cover letter.
-- **Tracking Applications**: Use the "My Applications" section to track your progress through the recruitment pipeline.
+- **Tracking Applications**: Use the "My Applications" section to track your progress through the application pipeline.
 - **Profile Management**: Update your academic details, skills, and CVs under the "Profile" tab to improve your chances.
-- **Communication**: Use the built-in messaging system to chat with Teachers regarding your application.
 
 <details>
 <summary>Click to view Applicant UI</summary>
@@ -103,8 +106,6 @@ Once logged in as an Applicant (TA), you have access to a suite of tools to find
   <img src="screenshot/06_applicant_apply_modal.png" alt="Apply Modal" width="800">
 - **My Applications & Tracker**
   <img src="screenshot/07_applicant_my_applications.png" alt="My Applications" width="800">
-- **Messaging (Chat)**
-  <img src="screenshot/09_applicant_messages_chat.png" alt="Applicant Messages Chat" width="800">
 - **Profile**
   <img src="screenshot/10_applicant_profile.png" alt="Applicant Profile" width="800">
 - **Notifications**
@@ -114,8 +115,7 @@ Once logged in as an Applicant (TA), you have access to a suite of tools to find
 ### 3. Using the System as an Teacher
 Teachers (Professors) can manage their job postings and review candidates.
 - **Managing Postings**: Use the "TA Positions" tab to create, edit, or delete job postings for your modules.
-- **Recruitment Pipeline**: The Kanban-style pipeline allows you to drag-and-drop applicants between stages (Review, Shortlisted, Offer, Rejected).
-- **Communication**: Reach out to promising candidates using the Teacher Messages interface.
+- **Application Pipeline**: The Kanban-style pipeline allows you to drag-and-drop applicants between stages (Review, Shortlisted, Offer, Rejected).
 
 <details>
 <summary>Click to view Teacher UI</summary>
@@ -125,10 +125,8 @@ Teachers (Professors) can manage their job postings and review candidates.
   <img src="screenshot/13_organiser_overview.png" alt="Organiser Overview" width="800">
 - **TA Positions**
   <img src="screenshot/14_organiser_ta_positions.png" alt="TA Positions" width="800">
-- **Recruitment Pipeline (Kanban)**
-  <img src="screenshot/15_organiser_pipeline.png" alt="Recruitment Pipeline" width="800">
-- **Messages**
-  <img src="screenshot/12_organiser_messages.png" alt="Organiser Messages" width="800">
+- **Application Pipeline (Kanban)**
+  <img src="screenshot/15_organiser_pipeline.png" alt="Application Pipeline" width="800">
 </details>
 
 ### 4. Using the System as an Admin

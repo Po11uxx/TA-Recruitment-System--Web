@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Create Account - UCI BioSci — TA Recruitment</title>
+  <title>Create Account - UCI BioSci — TA Application System</title>
   <meta name="ctx" content="<%= request.getContextPath() %>">
   <jsp:include page="/common/head.jsp"/>
 </head>
@@ -20,7 +20,7 @@
         <i data-lucide="arrow-left" class="h-5 w-5 group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-medium text-sm sm:text-base"><span class="sm:hidden">Home</span><span class="hidden sm:inline">Back to Home</span></span>
       </a>
-      <div class="uci-auth-identity"><jsp:include page="/common/uci-wordmark.jsp"/></div>
+      <a class="uci-auth-identity" href="https://www.bio.uci.edu/" aria-label="Visit the UCI School of Biological Sciences website"><jsp:include page="/common/uci-wordmark.jsp"/></a>
     </div>
     
     <!-- Title Area -->
@@ -64,7 +64,7 @@
               </div>
             </div>
 
-            <p class="text-sm text-zinc-500 text-center">Create an applicant account. Teacher and admin accounts are provided by an admin.</p>
+            <p class="text-sm text-zinc-500 text-center">Create your student account to apply for TA positions.</p>
             
             <div id="errorMsg" class="hidden text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl px-6 py-3 text-center"></div>
 
@@ -117,7 +117,7 @@
         window.initParticles('auth-canvas');
       }
       if(window.initStitchMatrix) {
-        window.initStitchMatrix('signup-stitch-matrix', { avoidSelector: '.apple-input, .segmented-control, button, a' });
+        window.initStitchMatrix('signup-stitch-matrix', { avoidSelector: '.apple-input, button, a' });
       }
       if(window.initSimpleTypewriter) window.initSimpleTypewriter('typewriter-text', ["Create account.", "Join us.", "Get started."]);
       if(window.initLoginAnteater) {
@@ -129,8 +129,6 @@
     setTimeout(() => {
       document.querySelectorAll('.slide-up-element').forEach(el => el.classList.add('visible'));
     }, 50);
-
-    let selectedRole = 'applicant';
 
     async function handleSignup(e) {
       e.preventDefault();
@@ -149,10 +147,10 @@
       const ctx = document.querySelector('meta[name="ctx"]').content;
 
       try {
-        await authApi.signup(name, email, pwd, selectedRole);
+        await authApi.signup(name, email, pwd);
         if(mascotAnim) mascotAnim.triggerSuccess();
         setTimeout(() => {
-          window.location.href = ctx + '/' + selectedRole + '/dashboard.jsp';
+          window.location.href = ctx + '/applicant/dashboard.jsp';
         }, 1000);
       } catch (err) {
         if(mascotAnim) mascotAnim.triggerFail();

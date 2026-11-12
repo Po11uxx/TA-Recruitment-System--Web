@@ -2,13 +2,13 @@
   <%@ include file="/common/auth-check.jsp" %>
     <jsp:include page="/common/layout-top.jsp" />
 
-    <div class="space-y-6 h-full flex flex-col">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="space-y-6 min-w-0">
+      <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Recruitment Pipeline</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Application Pipeline</h1>
           <p class="text-zinc-500 mt-2">Manage applicants through the hiring stages. Use Review Workspace for approval.</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           <div class="relative w-full md:w-64">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400"></i>
             <input id="searchInput" type="text" placeholder="Search candidates..." class="input pl-9 bg-white"
@@ -39,8 +39,8 @@
 <label>Qualification match<select id="qualificationMatch" class="input" onchange="renderKanban()"><option value="">All results</option><option value="meets_required">Meets required criteria</option><option value="missing_required">Missing required criteria</option><option value="needs_confirmation">Needs confirmation</option></select></label>
 <label>Sort<select id="qualificationSort" class="input" onchange="renderKanban()"><option value="newest">Newest application</option><option value="name">Applicant name</option><option value="score">Qualification match score</option></select></label>
       </div>
-      <div class="flex-1 overflow-x-auto pb-4">
-        <div class="flex gap-6 h-full min-w-max" id="kanban">
+      <div class="pb-4">
+        <div class="pipeline-board" id="kanban">
           <div class="text-center text-zinc-400 py-12 w-full">Loading...</div>
         </div>
       </div>
@@ -155,12 +155,12 @@
         apps.sort((a,b)=>sort==='name'?(a.name||'').localeCompare(b.name||'','en'):sort==='score'?((b.qualificationMatching||{}).score??-1)-((a.qualificationMatching||{}).score??-1):(b.date||'').localeCompare(a.date||''));
         document.getElementById('kanban').innerHTML = COLUMNS.map(col => {
           const colApps = apps.filter(a => a.status === col.id);
-          return '<div class="flex flex-col w-80 shrink-0 bg-zinc-50/50 rounded-2xl p-4 border border-transparent kanban-col" data-status="' + col.id + '" ondragover="onDragOver(event)" ondrop="onDrop(event, \'' + col.id + '\')">' +
+          return '<div class="flex min-w-0 flex-col bg-zinc-50/50 rounded-2xl p-3 border border-transparent kanban-col" data-status="' + col.id + '" ondragover="onDragOver(event)" ondrop="onDrop(event, \'' + col.id + '\')">' +
             '<div class="flex items-center justify-between mb-4 px-2">' +
             '<h3 class="font-semibold text-zinc-900 flex items-center gap-2">' + col.title +
             ' <span class="px-2 py-0.5 rounded-full text-xs font-bold ' + col.color + '">' + colApps.length + '</span></h3>' +
             '</div>' +
-            '<div class="flex-1 space-y-3 overflow-y-auto">' +
+            '<div class="flex-1 min-w-0 space-y-3">' +
             colApps.map(a => renderCard(a)).join('') +
             '</div></div>';
         }).join('');
