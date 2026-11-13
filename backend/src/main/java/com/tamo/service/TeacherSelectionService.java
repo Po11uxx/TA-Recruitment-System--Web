@@ -16,6 +16,7 @@ public class TeacherSelectionService {
                 && Set.of("approve","not_selected").contains(r.getAction()));
     }
     private static boolean maySelect(DataStore ds, User user, Application app) {
+        if(!"admin".equals(user.getRole())) return false;
         Job job=ds.getJobs().stream().filter(j -> Objects.equals(j.getId(),app.getJobId())).findFirst().orElse(null);
         if(job==null || !ReviewAccess.can(user,"review.read")) return false;
         com.tamo.model.Module module=ReviewAccess.module(ds,job);
@@ -56,7 +57,6 @@ public class TeacherSelectionService {
         JsonObject approval=new JsonObject();approval.addProperty("action","approve");approval.addProperty("sectionId",section);approval.addProperty("note",note);
         new ReviewService(target).record(userId,applicationId,approval);
         JsonObject assignment=body.deepCopy();assignment.addProperty("applicationId",applicationId);
-        if("admin".equals(user.getRole())) assignment.addProperty("reason",note);
         try {
             SectionAssignment draft=new SectionAssignmentService(target).assign(userId,user.getRole(),assignment);
             JsonObject result=new JsonObject();result.addProperty("applicationId",applicationId);result.addProperty("assignmentId",draft.getId());result.addProperty("publicationStatus",draft.getPublicationStatus());return result;

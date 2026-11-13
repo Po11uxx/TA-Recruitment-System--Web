@@ -21,23 +21,19 @@ public class ReviewServlet extends HttpServlet{
    User target=data.getData().getUsers().stream().filter(u->id.equals(u.getId())).findFirst()
        .orElseThrow(()->new QualificationService.Problem(404,"User not found."));
    if("applicant".equals(target.getRole()))throw new QualificationService.Problem(400,"Review grants are configured for staff accounts.");
-   boolean delegate="admin".equals(target.getRole());
-   if(delegate&&actor.equals(id))throw new QualificationService.Problem(403,"Another admin must manage your course delegation.");
+   if("admin".equals(target.getRole()))throw new QualificationService.Problem(403,"Admin access applies to all courses.");
    JsonObject body=JsonUtil.readRequestBodyAsJson(req);
    List<String> permissions=QualificationService.list(body,"permissions"),courses=QualificationService.list(body,"courseIds");
-   Set<String> allowed=delegate?ReviewAccess.ADMIN_DELEGATIONS:ReviewAccess.PERMISSIONS;
+   Set<String> allowed=ReviewAccess.PERMISSIONS;
    if(!allowed.containsAll(permissions))throw new QualificationService.Problem(400,"Unknown permission for this role.");
-   if(delegate&&!permissions.isEmpty()&&courses.isEmpty())throw new QualificationService.Problem(400,"Choose at least one course for delegated access.");
-   if(!delegate&&permissions.stream().anyMatch(p->!p.equals("review.read"))&&!permissions.contains("review.read"))
+   if(permissions.stream().anyMatch(p->!p.equals("review.read"))&&!permissions.contains("review.read"))
     throw new QualificationService.Problem(400,"Review actions also require View applications permission.");
    for(String course:courses)if(data.getData().getModules().stream().noneMatch(m->course.equals(m.getId())))
     throw new QualificationService.Problem(400,"Unknown course.");
-   String reason=delegate?QualificationService.text(body,"reason",1000,true):"";
-   target.setPermissions(permissions);target.setCourseIds(delegate&&permissions.isEmpty()?List.of():courses);
+   target.setPermissions(permissions);target.setCourseIds(courses);
    data.save();
    data.addLog("Review Access Updated","info",(String)req.getSession().getAttribute("userName"),actor,
-       "Updated grants for "+id+" | permissions: "+permissions+" | courses: "+target.getCourseIds()
-       +(delegate?" | reason: "+reason:""),req.getRemoteAddr());
+       "Updated grants for "+id+" | permissions: "+permissions+" | courses: "+target.getCourseIds(),req.getRemoteAddr());
    JsonUtil.writeJson(resp,settings(actor));
   }catch(QualificationService.Problem e){JsonUtil.writeError(resp,e.status,e.getMessage());}
   catch(JsonParseException e){JsonUtil.writeError(resp,400,"Invalid JSON.");}

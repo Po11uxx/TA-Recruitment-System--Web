@@ -8,9 +8,6 @@
           <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Teacher Overview</h1>
           <p class="text-zinc-500 mt-2">Manage your TA application pipeline across modules.</p>
         </div>
-        <a href="<%= request.getContextPath() %>/organiser/jobs.jsp?create=true" class="btn btn-primary gap-2 shrink-0">
-          <i data-lucide="plus" class="h-4 w-4"></i> Create Posting
-        </a>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="statsGrid">

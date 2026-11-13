@@ -26,7 +26,15 @@
   function candidates() { return (data.candidates||[]).filter(a=>a.periodId===period()&&a.moduleId===course()); }
   function sections() { return (data.sections||[]).filter(s=>s.moduleId===course()&&s.status==='active'&&(s.periodId===period()||(!s.periodId&&period()==='period_legacy'))); }
   function occupied(id) { return data.assignments.filter(a=>a.periodId===period()&&a.sectionId===id&&a.status==='active'&&a.responseStatus!=='expired').length; }
-  function candidate() { return candidates().find(a=>a.applicationId===el('assignmentCandidate').value); }
+  function isDirect() { return el('assignmentSource').value==='direct'; }
+  function candidate() {
+    const id=el('assignmentCandidate').value;
+    if(!isDirect()) return candidates().find(a=>a.applicationId===id);
+    const applicant=(data.directApplicants||[]).find(a=>a.id===id);
+    if(!applicant) return null;
+    const active=data.assignments.filter(a=>a.applicantId===id&&a.periodId===period()&&a.status==='active');
+    return {applicantId:id,weeklyHoursTotal:active.reduce((sum,a)=>sum+a.sectionSnapshot.hoursPerWeek,0)};
+  }
   function selectedSection() { return sections().find(s=>s.id===el('assignmentSection').value); }
   function matching(c,s) { return c&&s&&((c.matching||{}).sections||[]).find(m=>m.sectionId===s.id); }
   function updatePreview() {
@@ -35,11 +43,16 @@
     const alreadyAssigned=!!(c&&s&&data.assignments.some(a=>a.status==='active'&&a.responseStatus!=='expired'&&a.periodId===period()&&a.applicantId===c.applicantId&&a.sectionId===s.id));
     el('manualConfirmation').classList.toggle('hidden',!c||!s||state!=='pending');
     el('confirmPending').checked=false; el('confirmationNote').value='';
-    el('assignmentPreview').textContent=c&&s ? (alreadyAssigned?'Already assigned':labels[state])+' · '+meetings(s)+'\n'+number(occupied(s.id))+' / '+number(s.taPositions)+' assigned. '+number(s.hoursPerWeek)+' hours per week.\nApplicant total: '+number(c.weeklyHoursTotal)+' → '+number(c.weeklyHoursTotal+(alreadyAssigned?0:s.hoursPerWeek))+' hours per week in this period. Other assignments are checked again on submit.' : 'Choose a period, course, applicant and section.';
+    el('assignmentPreview').textContent=c&&s ? (alreadyAssigned?'Already assigned':isDirect()?'Availability checked on save':labels[state])+' · '+meetings(s)+'\n'+number(occupied(s.id))+' / '+number(s.taPositions)+' assigned. '+number(s.hoursPerWeek)+' hours per week.\nApplicant total: '+number(c.weeklyHoursTotal)+' → '+number(c.weeklyHoursTotal+(alreadyAssigned?0:s.hoursPerWeek))+' hours per week in this period. Other assignments are checked again on submit.' : 'Choose a period, course, applicant and section.';
     el('assignTaButton').disabled=busy||!c||!s||alreadyAssigned||state==='conflict'||occupied(s.id)>=s.taPositions;
   }
   function choose() {
-    options(el('assignmentCandidate'),candidates().map(c=>[c.applicationId,(c.name||c.applicantId)+' · '+c.applicationId]),'Choose offered applicant');
+    const direct=isDirect();
+    el('assignmentDraftReasonLabel').classList.toggle('hidden',!direct);
+    el('assignmentDraftReason').required=direct;
+    const applicants=direct?(data.directApplicants||[]).map(a=>[a.id,(a.name||a.id)+' · '+a.email])
+        :candidates().map(c=>[c.applicationId,(c.name||c.applicantId)+' · '+c.applicationId]);
+    options(el('assignmentCandidate'),applicants,direct?'Choose Applicant':'Choose approved Applicant');
     options(el('assignmentSection'),sections().map(s=>[s.id,s.name+' · '+occupied(s.id)+' / '+s.taPositions+' assigned']),'Choose section');
     el('assignmentCapacity').replaceChildren();
     if(!period()||!course()) text(el('assignmentCapacity'),'Choose a period and course.');
@@ -52,9 +65,6 @@
     el('assignmentActionTitle').textContent={publish:'Publish assignment',accept:'Accept assignment',decline:'Decline assignment'}[action];
     el('assignmentActionDetails').textContent=a.moduleCode+' · '+a.sectionSnapshot.name+'\n'+meetings(a.sectionSnapshot)+'\n'+number(a.sectionSnapshot.hoursPerWeek)+' hours / week · '+(a.sectionSnapshot.location||'Location not specified')+'\n'+(action==='publish'?'Publishing makes this assignment visible to the student and sends an in-app notification.':action==='accept'?'Confirm that you accept these meetings and weekly hours.':'Declining releases this position. Your reply and reason will be retained.');
     el('assignmentDeclineReasonLabel').classList.toggle('hidden',action!=='decline');el('assignmentDeclineReason').required=action==='decline';
-    const adminPublish=role==='admin'&&action==='publish';
-    el('assignmentPublishReasonLabel').classList.toggle('hidden',!adminPublish);
-    el('assignmentPublishReason').required=adminPublish;el('assignmentPublishReason').value='';
     el('assignmentDeclineReason').value='';el('assignmentActionError').textContent='';el('assignmentActionDialog').showModal();
   }
   function render() {
@@ -89,6 +99,7 @@
       }
       if(canManage(a.sectionSnapshot.moduleId)&&resultState(a)==='draft') actionButton('Publish result','publish');
       if(student&&resultState(a)==='pending') {actionButton('Accept assignment','accept');actionButton('Decline assignment','decline');}
+      if(!student&&a.directReason) text(card,'Direct assignment · '+a.directReason,'text-sm');
       if(!student&&a.manualConfirmationNote) text(card,'Manual confirmation: '+a.manualConfirmationNote,'text-sm');
       if(resultState(a)==='cancelled') text(card,a.responseStatus==='expired'?'Historical cancellation':('Cancelled: '+localTime(a.cancelledAt)+' · '+a.cancellationReason),'text-sm');
       if(canManage(a.sectionSnapshot.moduleId)&&a.status==='active'&&a.responseStatus!=='expired'&&resultState(a)!=='cancelled') {
@@ -134,10 +145,13 @@
     event.preventDefault();if(busy||!canManage(course()))return;
     const c=candidate(),s=selectedSection();if(!c||!s)return;
     const payload={applicationId:c.applicationId,sectionId:s.id,confirmPending:el('confirmPending').checked,manualConfirmationNote:el('confirmationNote').value.trim()};
-    if(role==='admin') payload.reason=el('assignmentDraftReason').value.trim();
-    if((matching(c,s)||{}).status!=='available'&&(!payload.confirmPending||payload.manualConfirmationNote.length<10)) {message('Confirm availability manually and enter a note of at least 10 characters.',true);return;}
+    if(isDirect()) {
+      delete payload.applicationId;
+      Object.assign(payload,{applicantId:c.applicantId,periodId:period(),reason:el('assignmentDraftReason').value.trim()});
+    }
+    if(!isDirect()&&(matching(c,s)||{}).status!=='available'&&(!payload.confirmPending||payload.manualConfirmationNote.length<10)) {message('Confirm availability manually and enter a note of at least 10 characters.',true);return;}
     setBusy(true);
-    try {await request(prefix,{method:'POST',body:JSON.stringify(payload)});el('assignmentDraftReason').value='';message('Assignment draft saved. Publish it when ready for the student to reply.');await load();}
+    try {await request(prefix+(isDirect()?'direct':''),{method:'POST',body:JSON.stringify(payload)});el('assignmentDraftReason').value='';message('Assignment draft saved. Publish it when ready for the student to reply.');await load();}
     catch(e) {message(e.message||'Assignment failed.',true);}
     finally {setBusy(false);updatePreview();}
   });
@@ -157,7 +171,7 @@
     if(action==='decline'&&!reason) {el('assignmentActionError').textContent='Please enter a reason for declining.';return;}
     setBusy(true);
     try {
-      const payload=action==='publish'?(role==='admin'?{reason:el('assignmentPublishReason').value.trim()}:{}):{decision:action,reason};
+      const payload=action==='publish'?{}:{decision:action,reason};
       await request(prefix+id+(action==='publish'?'/publish':'/respond'),{method:'POST',body:JSON.stringify(payload)});
       el('assignmentActionDialog').close();message(action==='publish'?'Result published. Student notified.':action==='accept'?'Assignment accepted.':'Assignment declined. Position released.');
       await load();if(typeof loadHeaderNotifications==='function')loadHeaderNotifications();
@@ -166,8 +180,7 @@
   });
   if(student) {el('assignmentsTitle').textContent='My TA Placement';el('assignmentWorkloadDescription').textContent='Published hours include arrangements awaiting your reply. Accepted hours count only your accepted, active arrangements in this period.';el('courseFilterLabel').classList.add('hidden');el('assignmentResultFilter').querySelector('option[value="draft"]').remove();}
   else el('assignmentStaff').classList.remove('hidden');
-  el('assignmentDraftReasonLabel').classList.toggle('hidden',role!=='admin');
-  el('assignmentDraftReason').required=role==='admin';
+  el('assignmentSource').addEventListener('change',choose);
   load();
   setInterval(()=>{
     if(document.hidden||busy||el('assignmentActionDialog').open||el('cancelAssignmentDialog').open) return;

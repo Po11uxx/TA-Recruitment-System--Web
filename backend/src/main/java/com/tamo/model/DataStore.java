@@ -13,6 +13,8 @@ public class DataStore {
     private List<ReviewRecord> reviewRecords=new java.util.ArrayList<>();
     public List<ReviewRecord> getReviewRecords(){return reviewRecords;}
     public void setReviewRecords(List<ReviewRecord> value){reviewRecords=value;}
+    private List<OfferEmail> offerEmails = new java.util.ArrayList<>();
+    public List<OfferEmail> getOfferEmails() { return offerEmails; }
     private List<SectionAssignment> sectionAssignments = new java.util.ArrayList<>();
     public List<SectionAssignment> getSectionAssignments() { return sectionAssignments; }
     public void setSectionAssignments(List<SectionAssignment> value) { sectionAssignments = value; }

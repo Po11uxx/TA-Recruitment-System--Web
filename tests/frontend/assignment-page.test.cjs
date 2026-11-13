@@ -14,11 +14,11 @@ for(const [zone,expected] of [['America/Los_Angeles','Nov 10, 2026, 15:30'],['As
  const style=await page.locator('#assignmentPeriod').evaluate(n=>{const s=getComputedStyle(n);return {appearance:s.appearance,paddingRight:s.paddingRight,image:s.backgroundImage,position:s.backgroundPosition};});assert.equal(style.appearance,'none');assert.equal(style.paddingRight,'44px');assert.match(style.image,/svg/);assert.match(style.position,/50%/);
  await page.locator('#assignmentResultFilter').selectOption('accepted');await page.waitForSelector('#assignment-a1',{state:'detached'});await page.locator('#assignmentResultFilter').selectOption('');await page.waitForSelector('#assignment-a1');assert.deepEqual(errors,[]);
 });
-async function actionFixture(t,role,responseStatus='pending',publicationStatus='published',manageableCourseIds=role==='organiser'?['bio']:[]) {
+async function actionFixture(t,role,responseStatus='pending',publicationStatus='published',manageableCourseIds=role==='admin'?['bio']:[]) {
  const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage();
  const body=fs.readFileSync(path.join(root,'common/assignments-content.jsp'),'utf8').replace(/<%[\s\S]*?%>/g,'');
  await page.route('**/*',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><body>'+body+'</body>'}));await page.goto('http://fixture.test/'+role+'/assignments.jsp');await page.addStyleTag({content:'.hidden{display:none}'});
- const data={periods:[{id:'fall',name:'Fall'}],modules:[{id:'bio',code:'BIO 93',name:'Biology'}],manageableCourseIds,sections:[],candidates:[],assignments:[{id:'a1',periodId:'fall',applicantId:'s1',applicantName:'Student',moduleCode:'BIO 93',sectionSnapshot:{moduleId:'bio',name:'Lab A',hoursPerWeek:8,meetingTimes:[]},status:'active',publicationStatus,responseStatus,assignedAt:'2026-11-10T23:30:00Z',responseDeadline:'2000-01-01T00:00:00Z',weeklyHoursTotal:8}]};
+ const data={periods:[{id:'fall',name:'Fall'}],modules:[{id:'bio',code:'BIO 93',name:'Biology'}],manageableCourseIds,sections:[{id:'lab',moduleId:'bio',periodId:'fall',status:'active',name:'Lab',taPositions:2,hoursPerWeek:4}],directApplicants:[{id:'direct-student',name:'Direct Student',email:'student@example.test'}],candidates:[],assignments:[{id:'a1',periodId:'fall',applicantId:'s1',applicantName:'Student',moduleCode:'BIO 93',sectionSnapshot:{moduleId:'bio',name:'Lab A',hoursPerWeek:8,meetingTimes:[]},status:'active',publicationStatus,responseStatus,assignedAt:'2026-11-10T23:30:00Z',responseDeadline:'2000-01-01T00:00:00Z',weeklyHoursTotal:8}]};
  await page.addScriptTag({content:'const CTX="";const fixture='+JSON.stringify(data)+';window.sent=[];window.request=async(url,options)=>{if(options)window.sent.push({url,...options});return fixture;};'});
  for(const file of ['static/js/assignment-time.js','static/js/assignments.js'])await page.addScriptTag({path:path.join(root,file)});
  await page.waitForFunction(()=>document.getElementById('assignmentResultSummary').textContent.length>0);return page;
@@ -30,26 +30,35 @@ for(const decision of ['accept','decline'])test('student can '+decision+' despit
  const sent=await page.evaluate(()=>window.sent[0]);assert.equal(sent.url,'/applicant/assignments/a1/respond');assert.deepEqual(JSON.parse(sent.body),{decision,reason:decision==='decline'?'Schedule changed':''});
 });
 test('staff publish uses an empty payload without a date picker',async t=>{
- const page=await actionFixture(t,'organiser','pending','draft');await page.getByRole('button',{name:'Publish result',exact:true}).click();assert.equal(await page.locator('#assignmentActionDialog input').count(),0);assert.doesNotMatch(await page.locator('#assignmentActionDialog').innerText(),/deadline|expire/i);await page.locator('#submitAssignmentAction').click();await page.waitForFunction(()=>window.sent.length===1);const sent=await page.evaluate(()=>window.sent[0]);assert.equal(sent.url,'/organiser/assignments/a1/publish');assert.deepEqual(JSON.parse(sent.body),{});
+ const page=await actionFixture(t,'admin','pending','draft');await page.getByRole('button',{name:'Publish result',exact:true}).click();assert.equal(await page.locator('#assignmentActionDialog input').count(),0);assert.doesNotMatch(await page.locator('#assignmentActionDialog').innerText(),/deadline|expire/i);await page.locator('#submitAssignmentAction').click();await page.waitForFunction(()=>window.sent.length===1);const sent=await page.evaluate(()=>window.sent[0]);assert.equal(sent.url,'/admin/assignments/a1/publish');assert.deepEqual(JSON.parse(sent.body),{});
 });
 test('legacy expired placement is cancelled history and cannot be accepted',async t=>{
  const page=await actionFixture(t,'applicant','expired');assert.equal(await page.locator('#assignment-a1').count(),0);assert.equal(await page.locator('option[value="expired"]').count(),0);await page.locator('#assignmentHistory').check();assert.match(await page.locator('#assignment-a1').innerText(),/Cancelled[\s\S]*Historical cancellation/);assert.equal(await page.getByRole('button',{name:'Accept assignment',exact:true}).count(),0);
 });
 
-test('admin sees a draft without editing controls by default',async t=>{
- const page=await actionFixture(t,'admin','pending','draft');
+test('a draft without a manageable course has no editing controls',async t=>{
+ const page=await actionFixture(t,'admin','pending','draft',[]);
  assert.equal(await page.locator('#assignment-a1').count(),1);
  assert.equal(await page.locator('#assignmentAccess').isVisible(),true);
  assert.equal(await page.locator('#assignmentDraftPanel').isVisible(),false);
  assert.equal(await page.getByRole('button',{name:'Publish result',exact:true}).count(),0);
  assert.equal(await page.getByRole('button',{name:'Cancel assignment',exact:true}).count(),0);
 });
-test('delegated admin can publish with a reason',async t=>{
- const page=await actionFixture(t,'admin','pending','draft',['bio']);
- await page.getByRole('button',{name:'Publish result',exact:true}).click();
- await page.locator('#assignmentPublishReason').fill('Covering for the Teacher');
- await page.locator('#submitAssignmentAction').click();
+
+test('admin can draft a placement for an Applicant with no application',async t=>{
+ const page=await actionFixture(t,'admin');
+ await page.locator('#assignmentSource').selectOption('direct');
+ await page.locator('#assignmentCandidate').selectOption('direct-student');
+ await page.locator('#assignmentSection').selectOption('lab');
+ await page.locator('#assignmentDraftReason').fill('Approved staffing exception');
+ await page.locator('#confirmPending').check();
+ await page.locator('#confirmationNote').fill('Confirmed availability with student.');
+ await page.locator('#assignTaButton').click();
  await page.waitForFunction(()=>window.sent.length===1);
  const sent=await page.evaluate(()=>window.sent[0]);
- assert.deepEqual(JSON.parse(sent.body),{reason:'Covering for the Teacher'});
+ assert.equal(sent.url,'/admin/assignments/direct');
+ assert.deepEqual(JSON.parse(sent.body),{
+   applicantId:'direct-student',sectionId:'lab',periodId:'fall',reason:'Approved staffing exception',
+   confirmPending:true,manualConfirmationNote:'Confirmed availability with student.'
+ });
 });

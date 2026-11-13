@@ -37,6 +37,14 @@ class JobSectionServiceTest {
         assertEquals(409,organiser.updateJob("u005",job.getId(),body).get("code"));assertEquals(List.of("lecture","lab"),job.getSectionIds());
         body=posting();body.add("sectionIds",JsonParser.parseString("[\"lab\",\"lecture\"]"));assertNotNull(organiser.updateJob("u005",job.getId(),body).get("job"));
     }
+    @Test void adminPostsForCourseWithoutBecomingItsTeacher() {
+        JsonObject body=posting();
+        body.add("sectionIds",JsonParser.parseString("[\"lecture\"]"));
+        Job job=(Job)organiser.createJob("u010",body).get("job");
+        assertNotNull(job);
+        assertEquals("u005",job.getOrganiserId());
+        assertTrue(ReviewAccess.organiserOwns(data,"u005",job));
+    }
     @Test void matchingOnlyShowsSelectedSections() {
         Job job=data.getJobs().get(0);job.setSectionIds(List.of("lecture"));
         Application app=data.getApplications().get(0);app.setPeriodId("period_test");
@@ -46,7 +54,7 @@ class JobSectionServiceTest {
     @Test void assignmentRejectsSectionOutsidePostingBeforeApproval() {
         Application app=data.getApplications().get(0);Job job=data.getJobs().stream().filter(j->j.getId().equals(app.getJobId())).findFirst().orElseThrow();job.setSectionIds(List.of("lecture"));
         JsonObject body=new JsonObject();body.addProperty("applicationId",app.getId());body.addProperty("sectionId","lab");
-        var error=assertThrows(SectionAssignmentService.Problem.class,()->new SectionAssignmentService(store).assign("u005","organiser",body));
+        var error=assertThrows(SectionAssignmentService.Problem.class,()->new SectionAssignmentService(store).assign("u010","admin",body));
         assertTrue(error.getMessage().contains("not included"));assertTrue(data.getSectionAssignments().isEmpty());
     }
     @Test void applicantCannotApplyToAnotherCyclesPosting() {

@@ -8,7 +8,7 @@ This report covers the changes on `XinyiXu` since `2c1fb97`. The release makes t
 | --- | --- | --- |
 | Account | Public registration creates an Applicant account. Login authenticates the stored account and routes to its assigned workspace. | An Applicant can register publicly. Admin creates staff accounts through Users. The stored account role determines access. |
 | Application period | Draft → Scheduled or Open → Closed or Expired. A scheduled period becomes effectively open at its start time. An open period becomes effectively expired at its deadline. | Admin manages the window. Submissions and availability edits require an eligible open window. Staff can continue reviewing after intake ends. |
-| TA posting | An active posting is eligible for display when the relevant application window and posting conditions are satisfied. | Admin assigns course ownership. The Teacher configures Sections and matching criteria and publishes a posting for their course. An open application period alone does not guarantee a visible posting. |
+| TA posting | An active posting is eligible for display when the relevant application window and posting conditions are satisfied. | Admin assigns course ownership, configures Sections and matching criteria, and publishes postings through TA Positions. An open application period alone does not guarantee a visible posting. |
 | Application | Applied → Review or Shortlist → Offer or Rejected. Review stages are optional. An eligible Applicant can withdraw an undecided submission, which removes it from the active list. | Applicants submit qualification and availability snapshots. Staff use Pipeline to organize progress and Review Workspace to record notes, recommendations and decisions. The formal approval creates an Offer; formal rejection records a reason. |
 | TA placement | Draft → Published and Awaiting Reply → Accepted or Declined. Authorized staff can cancel an active placement. | Direct TA selection records approval and creates a Section assignment draft together. The Applicant sees the placement after publication and can accept or decline online. Decline or cancellation releases capacity and preserves history. Pending placements remain pending until reply or cancellation. |
 
@@ -47,3 +47,23 @@ An application decision and a placement reply are separate records. An **Offer**
 - The latest application regression run passed **415 Java tests** excluding the PostgreSQL integration suite and **53 frontend tests**. Browser tests used synthetic API fixtures. Coverage includes account routing, forged signup roles, availability range selection, placement replies, default admin read access, scoped delegation, grant revocation, and CSV authorization.
 - A separate earlier run documented in the [change log](XinyiXu-change-log.md) passed 23 isolated PostgreSQL integration tests for the placement migration. The latest combined changes have not been exercised against a running application database.
 - Restart the backend when deploying this release so it loads the new code and applies V15. Existing applications, historical assignment replies, and submitted schedule snapshots remain available.
+
+## Follow-up: Admin staffing and direct assignment
+
+This update replaces the course delegation model described above. Admin has global course access and manages Course Sections, Matching Criteria, TA Positions, and TA Assignments. Teachers use Review Workspace to view applications for their assigned courses and approve or reject them. The Teacher posting page and its client actions have been removed. An approval makes the application eligible for admin assignment.
+
+In Admin → TA Assignments, select the application period and course, choose Direct assignment as the source, then select an active Applicant and Section and enter a reason. The system checks saved availability, capacity, duplicate assignments, and overlaps with other active assignments. Missing or incomplete availability requires manual confirmation. A direct assignment creates a draft with an audit reason. After admin publishes it, the Applicant can accept or decline in My TA Placements. No application or Offer record is created.
+
+Restart the backend to apply migration V16. The migration allows direct placements to have no application reference and requires a reason for those placements.
+
+## Offer email delivery
+
+Admin's formal publication creates an email request for both application-based offers and direct assignments. The request commits with the placement in PostgreSQL. Campus IT owns the mail worker, email delivery and production acceptance. This deployment dependency remains open until IT verifies delivery. See the [IT handoff](offer-email-it-handoff.md).
+
+## Admin overview and course assignment
+
+- **Overview** lists applications awaiting a final decision, oldest first. Each entry shows the applicant, course, position, application period, and submission date. Selecting an entry opens the application in Review Workspace. Notes, recommendations, and shortlisting keep an application in the queue until approval or rejection.
+- **Global Modules** lets admins choose an active Teacher by name or email when creating or editing a course. The form saves the selected account ID and displays the Teacher's name.
+- **Workload Intel** continues to report weekly hours by application period. Reserved hours include active drafts and offers awaiting a reply. Accepted hours reflect published placements accepted by the student. Direct assignments use the same reporting rules.
+
+Deploy with migrations V16 and V17. The [IT email handoff](offer-email-it-handoff.md) remains open until Campus IT connects the mail worker and verifies timely delivery.

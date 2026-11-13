@@ -13,6 +13,7 @@ import com.tamo.model.Message;
 import com.tamo.model.Module;
 import com.tamo.model.Notification;
 import com.tamo.model.Profile;
+import com.tamo.model.ReviewRecord;
 import com.tamo.model.Term;
 import com.tamo.model.User;
 import com.tamo.model.WorkloadAssignment;
@@ -98,7 +99,39 @@ public class AdminService {
         }
         result.add("systemAlerts", alerts);
 
+        result.add("pendingApplications", pendingApplications(data));
         return result;
+    }
+
+    private JsonArray pendingApplications(DataStore data) {
+        Set<String> decided = data.getReviewRecords().stream()
+                .filter(record -> "approve".equals(record.getAction()) || "not_selected".equals(record.getAction()))
+                .map(ReviewRecord::getApplicationId).collect(Collectors.toSet());
+        Map<String, Job> jobs = new HashMap<>();
+        data.getJobs().forEach(job -> jobs.put(job.getId(), job));
+        Map<String, String> names = new HashMap<>();
+        data.getUsers().forEach(user -> names.put(user.getId(), user.getName()));
+        Map<String, String> periods = new HashMap<>();
+        data.getApplicationPeriods().forEach(period -> periods.put(period.getId(), period.getName()));
+        Set<String> awaitingReview = Set.of("applied", "review", "shortlisted");
+        JsonArray pending = new JsonArray();
+        data.getApplications().stream()
+                .filter(app -> app.getStatus() != null && awaitingReview.contains(RecruitmentStatus.current(app.getStatus()))
+                        && !decided.contains(app.getId()) && jobs.containsKey(app.getJobId()))
+                .sorted(Comparator.comparing(Application::getAppliedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .forEach(app -> {
+                    Job job = jobs.get(app.getJobId());
+                    JsonObject row = new JsonObject();
+                    row.addProperty("id", app.getId());
+                    row.addProperty("name", names.getOrDefault(app.getApplicantId(), "Historical applicant"));
+                    row.addProperty("course", job.getModuleCode());
+                    row.addProperty("position", job.getTitle());
+                    row.addProperty("period", periods.getOrDefault(app.getPeriodId(), "Historical period"));
+                    row.addProperty("appliedAt", app.getAppliedAt());
+                    pending.add(row);
+                });
+        return pending;
     }
 
     // ==================== Users ====================

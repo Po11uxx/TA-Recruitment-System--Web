@@ -37,6 +37,7 @@ public final class PostgresStore {
         MODELS.put("weeklyAvailabilities", WeeklyAvailability.class);
         MODELS.put("courseSections", CourseSection.class);
         MODELS.put("sectionAssignments", SectionAssignment.class);
+        MODELS.put("offerEmails", OfferEmail.class);
         MODELS.put("reviewRecords",ReviewRecord.class);
     }
 
@@ -127,6 +128,8 @@ public final class PostgresStore {
                 applyAvailabilityEvidenceSchema();
                 applyJobSectionsSchema();
                 applyOptionalReplySchema();
+                applyDirectAssignmentSchema();
+                applyOfferEmailSchema();
                 load();
                 save(source);
                 try (Statement stmt = connection.createStatement()) {
@@ -148,6 +151,8 @@ public final class PostgresStore {
                 applyAvailabilityEvidenceSchema();
                 applyJobSectionsSchema();
                 applyOptionalReplySchema();
+                applyDirectAssignmentSchema();
+                applyOfferEmailSchema();
             }
             finishPeriodMigration();
             finishReviewMigration(installed);
@@ -201,6 +206,31 @@ public final class PostgresStore {
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
                 stmt.executeUpdate("INSERT INTO tamo_schema_version(version) VALUES (3)");
+            }
+        }
+    }
+
+    private void applyOfferEmailSchema() throws SQLException, IOException {
+        try (Statement stmt=connection.createStatement();
+             ResultSet rs=stmt.executeQuery("SELECT 1 FROM tamo_schema_version WHERE version=17")) {
+            if(rs.next()) return;
+        }
+        try (var stream=PostgresStore.class.getResourceAsStream("/db/V17__offer_email.sql")) {
+            if(stream==null) throw new IOException("Missing migration V17");
+            try (Statement stmt=connection.createStatement()) {
+                stmt.execute(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+                stmt.executeUpdate("INSERT INTO tamo_schema_version(version) VALUES (17)");
+            }
+        }
+    }
+
+    private void applyDirectAssignmentSchema() throws SQLException, IOException {
+        try (Statement stmt=connection.createStatement(); ResultSet rs=stmt.executeQuery("SELECT 1 FROM tamo_schema_version WHERE version=16")) { if(rs.next()) return; }
+        try (var stream=PostgresStore.class.getResourceAsStream("/db/V16__direct_assignment.sql")) {
+            if(stream==null) throw new IOException("Missing migration V16");
+            try (Statement stmt=connection.createStatement()) {
+                stmt.execute(new String(stream.readAllBytes(),StandardCharsets.UTF_8));
+                stmt.executeUpdate("INSERT INTO tamo_schema_version(version) VALUES(16)");
             }
         }
     }

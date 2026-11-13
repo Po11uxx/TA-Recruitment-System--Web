@@ -68,11 +68,9 @@
 
     <servlet><servlet-name>SectionAssignmentServlet</servlet-name><servlet-class>com.tamo.servlet.SectionAssignmentServlet</servlet-class></servlet>
     <servlet-mapping><servlet-name>SectionAssignmentServlet</servlet-name><url-pattern>/api/admin/assignments/*</url-pattern></servlet-mapping>
-    <servlet-mapping><servlet-name>SectionAssignmentServlet</servlet-name><url-pattern>/api/organiser/assignments/*</url-pattern></servlet-mapping>
     <servlet-mapping><servlet-name>SectionAssignmentServlet</servlet-name><url-pattern>/api/applicant/assignments/*</url-pattern></servlet-mapping>
 <servlet><servlet-name>CriteriaServlet</servlet-name><servlet-class>com.tamo.servlet.CriteriaServlet</servlet-class></servlet>
 <servlet-mapping><servlet-name>CriteriaServlet</servlet-name><url-pattern>/api/admin/criteria/*</url-pattern></servlet-mapping>
-<servlet-mapping><servlet-name>CriteriaServlet</servlet-name><url-pattern>/api/organiser/criteria/*</url-pattern></servlet-mapping>
 <servlet><servlet-name>ReviewServlet</servlet-name><servlet-class>com.tamo.servlet.ReviewServlet</servlet-class></servlet>
 <servlet-mapping><servlet-name>ReviewServlet</servlet-name><url-pattern>/api/review/*</url-pattern></servlet-mapping>
 <servlet-mapping><servlet-name>ReviewServlet</servlet-name><url-pattern>/api/admin/review-access/*</url-pattern></servlet-mapping>
@@ -87,10 +85,6 @@
         <servlet-name>CourseSectionServlet</servlet-name>
         <url-pattern>/api/admin/course-sections/*</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CourseSectionServlet</servlet-name>
-        <url-pattern>/api/organiser/course-sections/*</url-pattern>
-    </servlet-mapping>
     <servlet>
         <servlet-name>ApplicationPeriodServlet</servlet-name>
         <servlet-class>com.tamo.servlet.ApplicationPeriodServlet</servlet-class>
@@ -98,10 +92,6 @@
     <servlet-mapping>
         <servlet-name>ApplicationPeriodServlet</servlet-name>
         <url-pattern>/api/admin/application-periods/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ApplicationPeriodServlet</servlet-name>
-        <url-pattern>/api/organiser/application-periods/*</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>AuthServlet</servlet-name>
@@ -149,4 +139,5 @@
     </servlet-mapping>
 
 <servlet><servlet-name>SponsorCsvServlet</servlet-name><servlet-class>com.tamo.servlet.SponsorCsvServlet</servlet-class></servlet><servlet-mapping><servlet-name>SponsorCsvServlet</servlet-name><url-pattern>/api/csv/*</url-pattern></servlet-mapping>
+    <servlet-mapping><servlet-name>OrganiserServlet</servlet-name><url-pattern>/api/admin/postings/*</url-pattern></servlet-mapping>
 </web-app>

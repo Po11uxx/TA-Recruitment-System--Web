@@ -8,7 +8,7 @@
   </main>
 </div>
 
-<script src="${pageContext.request.contextPath}/static/js/api.js?v=availability-1"></script>
+<script src="${pageContext.request.contextPath}/static/js/api.js?v=admin-operations-1"></script>
 <script>window.TeacherSelectionAssignmentsPath = '${pageContext.request.contextPath}/<%= "admin".equals(userRole) ? "admin" : "organiser" %>/assignments.jsp';</script>
 <script src="${pageContext.request.contextPath}/static/js/teacher-selection.js"></script>
 <script>
@@ -109,7 +109,7 @@
     const ctx = document.querySelector('meta[name="ctx"]')?.content || '';
     if ((n.type || '').startsWith('assignment_')) return ctx + '/' + _notifRole + '/assignments.jsp?assignmentId=' + encodeURIComponent(n.relatedId || '');
     if (_notifRole === 'organiser') {
-      return ctx + '/organiser/applications.jsp';
+      return ctx + '/review/dashboard.jsp';
     }
     return ctx + '/applicant/applications.jsp';
   }

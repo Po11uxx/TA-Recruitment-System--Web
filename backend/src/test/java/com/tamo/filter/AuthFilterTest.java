@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +32,17 @@ class AuthFilterTest {
     @BeforeEach
     void setUp() {
         filter = new AuthFilter();
+    }
+
+    @Test
+    void signedOutStudentFollowsOfferLinkThroughLogin() throws Exception {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getServletPath()).thenReturn("/applicant/assignments.jsp");
+        when(request.getContextPath()).thenReturn("/tamo");
+        when(request.getParameter("assignmentId")).thenReturn("assignment_email");
+        filter.doFilter(request,response,chain);
+        verify(response).sendRedirect("/tamo/auth/login.jsp?placementId=assignment_email");
+        verifyNoInteractions(chain);
     }
 
     @Test
@@ -153,7 +166,7 @@ class AuthFilterTest {
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("userId")).thenReturn("u001");
         when(session.getAttribute("role")).thenReturn("applicant");
-        when(request.getRequestURI()).thenReturn("/tamo/api/organiser/jobs");
+        when(request.getRequestURI()).thenReturn("/tamo/api/organiser/notifications");
         stubWriter();
 
         filter.doFilter(request, response, chain);
@@ -185,11 +198,26 @@ class AuthFilterTest {
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("userId")).thenReturn("u005");
         when(session.getAttribute("role")).thenReturn("organiser");
-        when(request.getRequestURI()).thenReturn("/tamo/api/organiser/jobs");
+        when(request.getRequestURI()).thenReturn("/tamo/api/organiser/notifications");
 
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"/api/organiser", "/api/admin/postings"})
+    void teacherCannotPublishPostings(String servletPath) throws Exception {
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getSession(false)).thenReturn(session);
+        when(session.getAttribute("userId")).thenReturn("u005");
+        when(session.getAttribute("role")).thenReturn("organiser");
+        when(request.getServletPath()).thenReturn(servletPath);
+        if ("/api/organiser".equals(servletPath)) when(request.getPathInfo()).thenReturn("/jobs");
+        stubWriter();
+        filter.doFilter(request,response,chain);
+        verify(response).setStatus(403);
+        verifyNoInteractions(chain);
     }
 
     @Test

@@ -38,6 +38,21 @@ class AdminServiceTest {
     @DisplayName("getDashboard")
     class DashboardTests {
         @Test
+        void pendingQueueExcludesDecisionsAndListsOldestFirst() {
+            var pending = service.getDashboard().getAsJsonArray("pendingApplications");
+            assertEquals(2, pending.size());
+            assertEquals("a001", pending.get(0).getAsJsonObject().get("id").getAsString());
+            assertEquals("a003", pending.get(1).getAsJsonObject().get("id").getAsString());
+            var decision = new com.tamo.model.ReviewRecord();
+            decision.setApplicationId("a001");
+            decision.setAction("not_selected");
+            dataStore.getReviewRecords().add(decision);
+            pending = service.getDashboard().getAsJsonArray("pendingApplications");
+            assertEquals(1, pending.size());
+            assertEquals("a003", pending.get(0).getAsJsonObject().get("id").getAsString());
+        }
+
+        @Test
         @DisplayName("Should return system-wide analytics")
         void shouldReturnAnalytics() {
             JsonObject result = service.getDashboard();

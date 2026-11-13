@@ -5,9 +5,18 @@
 
     <div class="space-y-8 max-w-6xl mx-auto">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Platform Analytics</h1>
-        <p class="text-zinc-500 mt-2">Overview of application metrics and system status.</p>
+        <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Admin Overview</h1>
+        <p class="text-zinc-500 mt-2">Track applications awaiting a decision and monitor staffing activity.</p>
       </div>
+
+      <section class="card p-5 space-y-3" aria-labelledby="pendingHeading">
+        <div class="flex items-center justify-between gap-3">
+          <h2 id="pendingHeading" class="text-lg font-bold">Applications awaiting a decision</h2>
+          <span id="pendingCount" class="rounded-full bg-blue-100 px-3 py-1 font-semibold text-blue-800" aria-label="Pending application count">—</span>
+        </div>
+        <p id="pendingStatus" class="text-sm text-zinc-500" role="status">Loading applications…</p>
+        <ul id="pendingApplications" class="max-h-96 overflow-y-auto divide-y divide-zinc-200"></ul>
+      </section>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="statsGrid">
         <div class="card fade-in">
@@ -85,7 +94,7 @@
       };
 
       const areaCtx = document.getElementById('areaChart').getContext('2d');
-      const areaChart = new Chart(areaCtx, {
+      const areaChart = typeof Chart === 'function' ? new Chart(areaCtx, {
         type: 'line',
         data: {
           labels: [],
@@ -102,10 +111,10 @@
           }]
         },
         options: chartOpts
-      });
+      }) : null;
 
       const barCtx = document.getElementById('barChart').getContext('2d');
-      const barChart = new Chart(barCtx, {
+      const barChart = typeof Chart === 'function' ? new Chart(barCtx, {
         type: 'bar',
         data: {
           labels: [],
@@ -118,7 +127,7 @@
           }]
         },
         options: chartOpts
-      });
+      }) : null;
 
       function formatSystemAlerts(alerts) {
         if (!alerts || !alerts.length) return 'No active alerts.';
@@ -151,6 +160,31 @@
         barChart.update();
       }
 
+      function renderPendingApplications(applications) {
+        const list = document.getElementById('pendingApplications');
+        const status = document.getElementById('pendingStatus');
+        const contextPath = document.querySelector('meta[name="ctx"]').content;
+        document.getElementById('pendingCount').textContent = applications.length;
+        status.textContent = applications.length ? 'Oldest submissions first' : 'No applications awaiting a decision.';
+        list.replaceChildren();
+        for (const application of applications) {
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.className = 'block rounded px-3 py-3 hover:bg-blue-50 focus-visible:bg-blue-50';
+          link.href = contextPath + '/review/dashboard.jsp?applicationId=' + encodeURIComponent(application.id);
+          const name = document.createElement('p');
+          name.className = 'font-semibold text-blue-800';
+          name.textContent = application.name || 'Applicant';
+          const detail = document.createElement('p');
+          detail.className = 'text-sm text-zinc-600';
+          const submitted = application.appliedAt?.slice(0, 10);
+          detail.textContent = [application.course, application.position, application.period, submitted].filter(Boolean).join(' · ');
+          link.append(name, detail);
+          item.append(link);
+          list.append(item);
+        }
+      }
+
       async function loadDashboard() {
         try {
           const data = await adminApi.getDashboard();
@@ -161,9 +195,11 @@
           document.getElementById('statOffers').textContent =
             data.acceptanceRate != null ? String(data.acceptanceRate) : '-';
           document.getElementById('alertText').textContent = formatSystemAlerts(data.systemAlerts);
-          updateChartsFromDashboard(data);
+          renderPendingApplications(data.pendingApplications || []);
+          if (areaChart && barChart) updateChartsFromDashboard(data);
         } catch (e) {
           console.error('Failed to load dashboard', e);
+          document.getElementById('pendingStatus').textContent = 'Could not load applications. Refresh to try again.';
           document.getElementById('alertText').textContent = 'Failed to load dashboard. Please refresh.';
         }
       }

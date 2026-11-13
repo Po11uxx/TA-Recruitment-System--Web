@@ -28,6 +28,12 @@ public class AuthFilter implements Filter {
 
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
+            String placementId = req.getParameter("assignmentId");
+            if ("GET".equals(req.getMethod()) && "/applicant/assignments.jsp".equals(req.getServletPath())
+                    && placementId != null && placementId.matches("[A-Za-z0-9_-]{1,200}")) {
+                resp.sendRedirect(req.getContextPath() + "/auth/login.jsp?placementId=" + placementId);
+                return;
+            }
             JsonUtil.writeError(resp, 401, "Not logged in");
             return;
         }
@@ -40,7 +46,11 @@ public class AuthFilter implements Filter {
             }
         }catch(IllegalStateException unavailable){/* DatabaseTransactionFilter rejects unavailable database requests first. */}
         String path = req.getServletPath();
-        if (path == null || path.isEmpty()) path = req.getRequestURI();
+        if (path == null || path.isEmpty()) {
+            path = req.getRequestURI();
+            String context = req.getContextPath();
+            if(context!=null&&path.startsWith(context)) path=path.substring(context.length());
+        }
 
         if ((path.contains("/api/csv/") || path.endsWith("/csv.jsp")) && !"admin".equals(role)) {
             JsonUtil.writeError(resp, 403, "CSV import and export are available to active admin accounts only.");
@@ -54,6 +64,20 @@ public class AuthFilter implements Filter {
         if ((path.contains("/api/organiser") || path.contains("/organiser/")) && !"organiser".equals(role)) {
             JsonUtil.writeError(resp, 403, "Access denied");
             return;
+        }
+        if ("organiser".equals(role)) {
+            if (path.startsWith("/organiser/")) {
+                resp.sendRedirect(req.getContextPath()+"/review/dashboard.jsp");
+                return;
+            }
+            if (path.startsWith("/api/organiser")) {
+                String operation = "/api/organiser".equals(path) ? req.getPathInfo()
+                        : path.substring("/api/organiser".length());
+                if (operation==null || !operation.matches("/notifications(?:/.*)?")) {
+                    JsonUtil.writeError(resp,403,"Use Review Workspace to view applications and record decisions.");
+                    return;
+                }
+            }
         }
         if ((path.contains("/api/admin") || path.contains("/admin/")) && !"admin".equals(role)) {
             JsonUtil.writeError(resp, 403, "Access denied");

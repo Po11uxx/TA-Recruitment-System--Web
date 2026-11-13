@@ -49,11 +49,6 @@ const applicantApi = {
 
 const organiserApi = {
   getDashboard: () => request('/organiser/dashboard'),
-  getMyModules: () => request('/organiser/modules'),
-  getJobs: () => request('/organiser/jobs'),
-  createJob: (data) => request('/organiser/jobs', { method: 'POST', body: JSON.stringify(data) }),
-  updateJob: (id, data) => request('/organiser/jobs/' + id, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteJob: (id) => request('/organiser/jobs/' + id, { method: 'DELETE' }),
   getApplicationPeriods: () => request('/organiser/application-periods'),
   getPipeline: (module, periodId) => {
     const params = new URLSearchParams();
@@ -73,6 +68,9 @@ const organiserApi = {
 };
 
 const adminApi = {
+  getNotifications: () => request('/admin/postings/notifications'),
+  markNotificationRead: (id) => request('/admin/postings/notifications/' + id + '/read', {method:'PUT'}),
+  markAllNotificationsRead: () => request('/admin/postings/notifications/read-all', {method:'PUT'}),
   getApplicationPeriods: () => request('/admin/application-periods'),
   createApplicationPeriod: (data) => request('/admin/application-periods', { method: 'POST', body: JSON.stringify(data) }),
   updateApplicationPeriod: (id, data) => request('/admin/application-periods/' + id, { method: 'PUT', body: JSON.stringify(data) }),

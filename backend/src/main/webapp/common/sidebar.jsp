@@ -34,23 +34,18 @@
     sectionRoot = ctx + "/organiser";
     navItems = new String[][] {
       {"Review Workspace", ctx+"/review/dashboard.jsp", "clipboard-check"},
-      {"Overview", sectionRoot + "/dashboard.jsp", "layout-dashboard"},
-      {"TA Positions", sectionRoot + "/jobs.jsp", "briefcase"},
-      {"Matching Criteria", sectionRoot + "/criteria.jsp", "list-checks"},
-      {"Course Sections", sectionRoot + "/course-sections.jsp", "calendar-range"},
-      {"TA Assignments", sectionRoot + "/assignments.jsp", "calendar-check"},
-      {"Pipeline", sectionRoot + "/pipeline.jsp", "users"},
     };
   } else if ("reviewer".equals(role)||"decision_maker".equals(role)||"viewer".equals(role)) {
     sectionRoot=ctx+"/review";navItems=new String[][]{{"Review Workspace",sectionRoot+"/dashboard.jsp","clipboard-check"}};
   } else {
     sectionRoot = ctx + "/admin";
     navItems = new String[][] {
+      {"Overview", sectionRoot + "/dashboard.jsp", "layout-dashboard"},
       {"CSV Import / Export", sectionRoot + "/csv.jsp", "file-spreadsheet"},
       {"Review Workspace", ctx+"/review/dashboard.jsp", "clipboard-check"},
       {"Review Access", sectionRoot+"/review-access.jsp", "shield-check"},
-      {"Analytics", sectionRoot + "/dashboard.jsp", "layout-dashboard"},
       {"Workload Intel", sectionRoot + "/workload.jsp", "trending-up"},
+      {"TA Positions", sectionRoot + "/jobs.jsp", "briefcase"},
       {"Global Modules", sectionRoot + "/modules.jsp", "book-open"},
       {"Matching Criteria", sectionRoot + "/criteria.jsp", "list-checks"},
       {"Course Sections", sectionRoot + "/course-sections.jsp", "calendar-range"},

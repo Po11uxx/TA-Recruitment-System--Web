@@ -31,7 +31,7 @@ public class SectionMatchingService {
             row.addProperty("taPositions", section.getTaPositions());
             row.add("meetingTimes", com.tamo.util.JsonUtil.getGson().toJsonTree(section.getMeetingTimes()));
             row.add("qualificationMatching",new CriteriaMatchingService().evaluate(application,job,section));
-            evaluate(row, application, section);
+            evaluate(row,application.getAvailabilitySnapshot(),application.getApplicantId(),application.getPeriodId(),section);
             sections.add(row);
         }
         boolean available = false, pending = false;
@@ -45,12 +45,17 @@ public class SectionMatchingService {
         return result;
     }
 
-    private void evaluate(JsonObject row, Application app, CourseSection section) {
+    String availabilityStatus(WeeklyAvailability schedule,String applicantId,CourseSection section) {
+        JsonObject result=new JsonObject();
+        evaluate(result,schedule,applicantId,section.getPeriodId(),section);
+        return result.get("status").getAsString();
+    }
+
+    private void evaluate(JsonObject row,WeeklyAvailability snapshot,String applicantId,String periodId,CourseSection section) {
         JsonArray issues = new JsonArray(); row.add("issues", issues);
-        WeeklyAvailability snapshot = app.getAvailabilitySnapshot();
         if (snapshot == null) { pending(row, "No submitted availability snapshot."); return; }
-        if (!Objects.equals(app.getApplicantId(), snapshot.getApplicantId())
-                || app.getPeriodId() == null || !Objects.equals(app.getPeriodId(), snapshot.getPeriodId())
+        if (!Objects.equals(applicantId, snapshot.getApplicantId())
+                || periodId == null || !Objects.equals(periodId, snapshot.getPeriodId())
                 || !AvailabilityService.TIME_ZONE.equals(snapshot.getTimeZone())
                 || !AvailabilityService.TIME_ZONE.equals(section.getTimeZone())) {
             pending(row, "Snapshot identity, application period or time zone could not be confirmed."); return;

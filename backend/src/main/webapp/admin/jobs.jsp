@@ -34,7 +34,7 @@
               <select id="jModule" class="input" onchange="onModuleChange()">
                 <option value="">Loading your courses...</option>
               </select>
-              <p id="jModuleHint" class="hidden text-xs text-amber-600 mt-1.5">You are not assigned to any course yet. Please ask an admin to assign you as the Teacher of a course before posting jobs.</p>
+              <p id="jModuleHint" class="hidden text-xs text-amber-600 mt-1.5">Create a course and assign its Teacher in Global Modules before posting a position.</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-zinc-700 mb-1.5">Department</label>
@@ -82,8 +82,8 @@
 
       async function loadMyModules() {
         try {
-          const [data, periods] = await Promise.all([organiserApi.getMyModules(), organiserApi.getApplicationPeriods()]);
-          postingPeriods = periods || [];
+          const [data, periods] = await Promise.all([request('/admin/postings/modules'), request('/admin/application-periods/')]);
+          postingPeriods = periods.periods || periods || [];
           myModules = data.modules || data || [];
           renderModuleOptions();
         } catch (e) {
@@ -98,7 +98,7 @@
         const hint = document.getElementById('jModuleHint');
         if (!sel) return;
         if (!myModules || myModules.length === 0) {
-          sel.innerHTML = '<option value="">No courses assigned to you</option>';
+          sel.innerHTML = '<option value="">No courses available</option>';
           sel.disabled = true;
           if (hint) hint.classList.remove('hidden');
           return;
@@ -124,7 +124,7 @@
 
       async function loadJobs() {
         try {
-          const data = await organiserApi.getJobs();
+          const data = await request('/admin/postings/jobs');
           const jobs = data.jobs || data || [];
           const container = document.getElementById('jobsList');
 
@@ -173,7 +173,7 @@
 
       function openCreate() {
         if (!myModules || myModules.length === 0) {
-          showToast('You have no courses assigned. Please ask an admin to assign you as the Teacher of a course first.', 'error');
+          showToast('Create a course in Global Modules before posting a position.', 'error');
           return;
         }
         document.getElementById('editJobId').value = '';
@@ -195,7 +195,7 @@
 
       async function editJob(id) {
         try {
-          const data = await organiserApi.getJobs();
+          const data = await request('/admin/postings/jobs');
           const job = (data.jobs || data).find(j => j.id === id);
           if (!job) return;
           document.getElementById('editJobId').value = id;
@@ -226,7 +226,7 @@
         if (!moduleId) { container.textContent = 'Select a course to see its Sections.'; return; }
         container.textContent = 'Loading Sections...';
         try {
-          const response = await fetch(ctx + '/api/organiser/course-sections/modules/' + encodeURIComponent(moduleId) + '/sections');
+          const response = await fetch(ctx + '/api/admin/course-sections/modules/' + encodeURIComponent(moduleId) + '/sections');
           const data = await response.json();
           if (!response.ok) throw new Error(data.error || 'Unable to load Sections.');
           if (request !== sectionRequest) return;
@@ -286,8 +286,8 @@
         }
         if (selected.length) payload.sectionIds = selected.map(i => i.value);
         try {
-          if (id) { await organiserApi.updateJob(id, payload); }
-          else { await organiserApi.createJob(payload); }
+          if (id) { await request('/admin/postings/jobs/'+encodeURIComponent(id), {method:'PUT',body:JSON.stringify(payload)}); }
+          else { await request('/admin/postings/jobs', {method:'POST',body:JSON.stringify(payload)}); }
           closeModal();
           showToast(id ? 'Job updated!' : 'Job created!');
           loadJobs();
@@ -300,7 +300,7 @@
       async function deleteJob(id) {
         if (!confirm('Delete this posting?')) return;
         try {
-          await organiserApi.deleteJob(id);
+          await request('/admin/postings/jobs/'+encodeURIComponent(id), {method:'DELETE'});
           showToast('Job deleted');
           loadJobs();
         } catch (e) { showToast(e.message, 'error'); }

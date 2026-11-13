@@ -8,6 +8,9 @@ public class SectionAssignment {
     private String applicationId;
     public String getApplicationId() { return applicationId; }
     public void setApplicationId(String value) { applicationId = value; }
+    private String directReason;
+    public String getDirectReason() { return directReason; }
+    public void setDirectReason(String value) { directReason = value; }
     private String sectionId;
     public String getSectionId() { return sectionId; }
     public void setSectionId(String value) { sectionId = value; }

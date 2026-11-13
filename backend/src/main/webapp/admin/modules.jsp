@@ -71,7 +71,19 @@
           <p id="mTermHint" class="hidden text-xs text-amber-600 mt-1.5">No terms yet. Add one in Properties first.</p>
         </div>
       </div>
-      <div><label class="block text-sm font-medium text-zinc-700 mb-1.5">Teacher ID</label><input id="mOrganiser" class="input" placeholder="User ID of the Teacher"></div>
+      <div>
+        <p id="teacherLabel" class="text-sm font-medium text-zinc-700 mb-1.5">Teacher</p>
+        <details id="teacherPicker" class="relative">
+          <summary class="input cursor-pointer" aria-labelledby="teacherLabel selectedTeacherName">
+            <span id="selectedTeacherName">Choose a Teacher</span>
+          </summary>
+          <div class="absolute z-10 mt-1 w-full rounded-lg border bg-white p-2 shadow-lg">
+            <input id="teacherSearch" type="search" class="input" placeholder="Search by name or email" aria-label="Search Teachers">
+            <div id="teacherOptions" class="mt-2 max-h-40 overflow-y-auto"></div>
+            <p id="teacherStatus" class="px-2 py-1 text-sm text-zinc-500" role="status"></p>
+          </div>
+        </details>
+      </div>
       <div id="modError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3"></div>
     </div>
     <div class="p-6 border-t border-zinc-200 flex justify-end gap-3">
@@ -273,14 +285,99 @@ function toggleModuleJobs(moduleId) {
   renderModules(allModules);
 }
 
+const teacherPicker = document.getElementById('teacherPicker');
+const teacherSearch = document.getElementById('teacherSearch');
+const teacherOptions = document.getElementById('teacherOptions');
+const teacherStatus = document.getElementById('teacherStatus');
+const teacherSummary = teacherPicker.querySelector('summary');
+let teachers = [];
+let selectedTeacher = null;
+let teacherLoadStatus = '';
+let teacherLoadVersion = 0;
+
+function renderTeachers() {
+  const query = teacherSearch.value.trim().toLowerCase();
+  const matches = teachers.filter(teacher =>
+    [teacher.name, teacher.email].some(value => (value || '').toLowerCase().includes(query)));
+  teacherOptions.replaceChildren();
+  for (const teacher of matches) {
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.className = 'block w-full rounded px-3 py-2 text-left hover:bg-blue-50 focus-visible:bg-blue-50';
+    option.setAttribute('aria-pressed', String(selectedTeacher?.id === teacher.id));
+    const name = document.createElement('span');
+    name.className = 'block font-medium';
+    name.textContent = teacher.name || teacher.email;
+    const email = document.createElement('span');
+    email.className = 'block text-xs text-zinc-500';
+    email.textContent = teacher.email || '';
+    option.append(name, email);
+    option.addEventListener('click', () => {
+      selectedTeacher = teacher;
+      document.getElementById('selectedTeacherName').textContent = teacher.name || teacher.email;
+      teacherPicker.open = false;
+      teacherSummary.focus();
+    });
+    teacherOptions.append(option);
+  }
+  teacherStatus.textContent = teacherLoadStatus ||
+    (matches.length ? '' : query ? 'No matching Teachers.' : 'No active Teachers available.');
+}
+
+function resetTeacherPicker(course = null) {
+  const version = ++teacherLoadVersion;
+  selectedTeacher = null;
+  teacherPicker.open = false;
+  teacherSearch.value = '';
+  document.getElementById('selectedTeacherName').textContent =
+    course?.organiserName || (course?.organiserId ? 'Current Teacher' : 'Choose a Teacher');
+  teachers = [];
+  teacherLoadStatus = 'Loading Teachers…';
+  renderTeachers();
+  adminApi.getUsers({role:'organiser', status:'active'}).then(users => {
+    if (version !== teacherLoadVersion) return;
+    teachers = users.sort((first, second) => (first.name || '').localeCompare(second.name || ''));
+    const current = teachers.find(teacher => teacher.id === course?.organiserId);
+    if (current && !selectedTeacher) {
+      document.getElementById('selectedTeacherName').textContent = current.name || current.email;
+    }
+    teacherLoadStatus = '';
+    renderTeachers();
+  }).catch(() => {
+    if (version !== teacherLoadVersion) return;
+    teacherLoadStatus = 'Could not load Teachers. Reopen the course form to retry.';
+    renderTeachers();
+  });
+}
+
+teacherSearch.addEventListener('input', renderTeachers);
+teacherPicker.addEventListener('toggle', () => {
+  if (!teacherPicker.open) return;
+  teacherSearch.value = '';
+  renderTeachers();
+  teacherSearch.focus();
+});
+teacherPicker.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && teacherPicker.open) {
+    event.preventDefault();
+    event.stopPropagation();
+    teacherPicker.open = false;
+    teacherSummary.focus();
+  }
+});
+document.addEventListener('click', event => {
+  if (!teacherPicker.contains(event.target)) teacherPicker.open = false;
+});
+
 async function openModuleModal() {
   document.getElementById('editModId').value = '';
   document.getElementById('modModalTitle').textContent = 'Add Module';
   document.getElementById('modSaveBtn').textContent = 'Create';
-  ['mCode','mName','mOrganiser'].forEach(id => document.getElementById(id).value = '');
+  ['mCode','mName'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('modError').classList.add('hidden');
   await loadProperties();
   populatePropertyDropdowns('', '');
+  resetTeacherPicker();
   document.getElementById('moduleModal').classList.add('show');
 }
 
@@ -292,10 +389,10 @@ async function editModule(id) {
   document.getElementById('modSaveBtn').textContent = 'Update';
   document.getElementById('mCode').value = m.code || '';
   document.getElementById('mName').value = m.name || '';
-  document.getElementById('mOrganiser').value = m.organiserId || '';
   document.getElementById('modError').classList.add('hidden');
   await loadProperties();
   populatePropertyDropdowns(m.department || '', m.term || '');
+  resetTeacherPicker(m);
   document.getElementById('moduleModal').classList.add('show');
 }
 
@@ -322,8 +419,11 @@ async function saveModule() {
     name: document.getElementById('mName').value.trim(),
     department: dept,
     term: term,
-    organiserId: document.getElementById('mOrganiser').value.trim(),
   };
+  if (selectedTeacher) {
+    payload.organiserId = selectedTeacher.id;
+    if (!id) payload.organiserName = selectedTeacher.name || '';
+  }
   try {
     if (id) { await adminApi.updateModule(id, payload); }
     else { await adminApi.createModule(payload); }

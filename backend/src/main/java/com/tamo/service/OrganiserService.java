@@ -122,8 +122,8 @@ public class OrganiserService {
      * @return the resulting object or status
      */
     public List<JsonObject> getNotifications(String organiserId) {
-        requireReview(organiserId);
         DataStore data = dataService.getData();
+        if(!postingAdmin(data,organiserId)) requireReview(organiserId);
         List<Notification> notifications = (data.getNotifications() != null
                 ? data.getNotifications() : Collections.<Notification>emptyList())
                 .stream()
@@ -218,10 +218,15 @@ public class OrganiserService {
      * @param organiserId the organiserId argument
      * @return the resulting object or status
      */
+    private boolean postingAdmin(DataStore data,String userId) {
+        return data.getUsers().stream().anyMatch(u -> Objects.equals(userId,u.getId())
+                && "admin".equals(u.getRole()) && "active".equals(u.getStatus()));
+    }
+
     public List<JsonObject> getMyModules(String organiserId) {
         DataStore data = dataService.getData();
         return data.getModules().stream()
-                .filter(m -> organiserId != null && organiserId.equals(m.getOrganiserId()))
+                .filter(m -> postingAdmin(data,organiserId) || organiserId != null && organiserId.equals(m.getOrganiserId()))
                 .map(m -> {
                     JsonObject obj = new JsonObject();
                     obj.addProperty("id", m.getId());
@@ -253,7 +258,7 @@ public class OrganiserService {
                     .filter(m -> moduleCode.equalsIgnoreCase(m.getCode()))
                     .findFirst().orElse(null);
         }
-        return module != null && organiserId.equals(module.getOrganiserId());
+        return module != null && (postingAdmin(data,organiserId) || organiserId.equals(module.getOrganiserId()));
     }
 
     /**
@@ -269,7 +274,7 @@ public class OrganiserService {
     public List<JsonObject> getJobs(String organiserId) {
         DataStore data = dataService.getData();
         return data.getJobs().stream()
-                .filter(j -> ReviewAccess.organiserOwns(data, organiserId, j))
+                .filter(j -> (postingAdmin(data,organiserId) || ReviewAccess.organiserOwns(data, organiserId, j)))
                 .map(j -> {
                     JsonObject obj = (JsonObject) JsonUtil.getGson().toJsonTree(j);
                     long totalApplications = data.getApplications().stream()
@@ -349,7 +354,14 @@ public class OrganiserService {
         DataStore data = dataService.getData();
         Job job = new Job();
         job.setId(dataService.generateId("j", data.getJobs()));
-        job.setOrganiserId(organiserId);
+        if(postingAdmin(data,organiserId)) {
+            String courseId=moduleId;
+            Module course=data.getModules().stream().filter(m->courseId.equals(m.getId())).findFirst().orElseThrow();
+            if(course.getOrganiserId()==null || course.getOrganiserId().isBlank()) {
+                result.put("error","Assign a Teacher to the course first.");result.put("code",400);return result;
+            }
+            job.setOrganiserId(course.getOrganiserId());
+        } else job.setOrganiserId(organiserId);
         job.setModuleCode(body.has("moduleCode") ? body.get("moduleCode").getAsString() : "");
         job.setModuleId(moduleId);
         job.setTitle(title);
@@ -377,7 +389,7 @@ public class OrganiserService {
 
         if (body.has("sectionIds")) {
             final String courseId=moduleId;
-            Module selectedCourse=data.getModules().stream().filter(m->Objects.equals(m.getId(),courseId) && Objects.equals(m.getOrganiserId(),organiserId)).findFirst().orElse(null);
+            Module selectedCourse=data.getModules().stream().filter(m->Objects.equals(m.getId(),courseId) && (postingAdmin(data,organiserId) || Objects.equals(m.getOrganiserId(),organiserId))).findFirst().orElse(null);
             if(selectedCourse==null || moduleCode!=null && !moduleCode.isBlank() && !Objects.equals(selectedCourse.getCode(),moduleCode)) {
                 result.put("error","Course and Section selections do not match."); result.put("code",400); return result;
             }
@@ -388,6 +400,10 @@ public class OrganiserService {
         }
 
         data.getJobs().add(job);
+        if(postingAdmin(data,organiserId)) {
+            Module course=ReviewAccess.module(data,job);
+            if(course!=null) { job.setOrganiserId(course.getOrganiserId()); job.setProfessor(course.getOrganiserName()); }
+        }
         dataService.save();
         result.put("job", job);
         return result;
@@ -424,7 +440,7 @@ public class OrganiserService {
             return result;
         }
 
-        if (!ReviewAccess.organiserOwns(data, organiserId, job)) {
+        if (!postingAdmin(data,organiserId) && !ReviewAccess.organiserOwns(data, organiserId, job)) {
             result.put("error", "No permission to edit this job");
             result.put("code", 403);
             return result;
@@ -432,7 +448,7 @@ public class OrganiserService {
 
         if (body.has("moduleId")) {
             String requestedCourseId=body.get("moduleId").getAsString();
-            Module requestedCourse=data.getModules().stream().filter(m->Objects.equals(m.getId(),requestedCourseId) && Objects.equals(m.getOrganiserId(),organiserId)).findFirst().orElse(null);
+            Module requestedCourse=data.getModules().stream().filter(m->Objects.equals(m.getId(),requestedCourseId) && (postingAdmin(data,organiserId) || Objects.equals(m.getOrganiserId(),organiserId))).findFirst().orElse(null);
             if(requestedCourse==null) { result.put("error","You can only post jobs for your own courses."); result.put("code",403); return result; }
             if(body.has("moduleCode") && !Objects.equals(requestedCourse.getCode(),body.get("moduleCode").getAsString())) {
                 result.put("error","Course selections do not match."); result.put("code",400); return result;
@@ -517,6 +533,10 @@ public class OrganiserService {
             data.getModules().stream().filter(m->Objects.equals(m.getId(),job.getModuleId())).findFirst().ifPresent(m->job.setModuleCode(m.getCode()));
         }
         if (body.has("sectionIds")) { job.setSectionIds(selectedSections); if(body.has("moduleId")) job.setModuleId(body.get("moduleId").getAsString()); job.setWorkDates(new ArrayList<>()); }
+        if(postingAdmin(data,organiserId)) {
+            Module course=ReviewAccess.module(data,job);
+            if(course!=null) { job.setOrganiserId(course.getOrganiserId()); job.setProfessor(course.getOrganiserName()); }
+        }
         dataService.save();
         result.put("job", job);
         return result;
@@ -551,7 +571,7 @@ public class OrganiserService {
             return result;
         }
 
-        if (!ReviewAccess.organiserOwns(data, organiserId, job)) {
+        if (!postingAdmin(data,organiserId) && !ReviewAccess.organiserOwns(data, organiserId, job)) {
             result.put("error", "No permission to delete this job");
             result.put("code", 403);
             return result;

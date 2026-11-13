@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AdminDelegationServletTest {
-    @Test void anotherAdminMustProvideCourseAndReasonAndCanRevoke() throws Exception {
+    @Test void globalAdminPermissionsCannotBeChangedByCourseGrants() throws Exception {
         var data = TestDataFactory.createTestDataStore();
         User delegate = new User();
         delegate.setId("delegate");
@@ -30,21 +30,9 @@ class AdminDelegationServletTest {
                 {"permissions":["assignment.manage"],"courseIds":["m001"],"reason":"Teacher on leave"}
                 """;
         verify(update(servlet,"delegate",grant)).setStatus(403);
-        verify(update(servlet,"u010",grant.replace("[\"m001\"]","[]"))).setStatus(400);
-        verify(update(servlet,"u010",grant.replace("Teacher on leave",""))).setStatus(400);
+        verify(update(servlet,"u010",grant)).setStatus(403);
         assertNull(delegate.getPermissions());
 
-        update(servlet,"u010",grant);
-        assertEquals(List.of("assignment.manage"),delegate.getPermissions());
-        assertEquals(List.of("m001"),delegate.getCourseIds());
-        assertTrue(data.getLogs().stream().anyMatch(log -> "u010".equals(log.getActorId())
-                && log.getDetails().contains("Teacher on leave")));
-
-        update(servlet,"u010","""
-                {"permissions":[],"courseIds":[],"reason":"Teacher returned"}
-                """);
-        assertTrue(delegate.getPermissions().isEmpty());
-        assertTrue(delegate.getCourseIds().isEmpty());
     }
 
     private HttpServletResponse update(ReviewServlet servlet,String actor,String body) throws Exception {

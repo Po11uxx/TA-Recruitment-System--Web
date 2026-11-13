@@ -146,7 +146,12 @@
         }
         if(mascotAnim) mascotAnim.triggerSuccess();
         setTimeout(() => {
-          window.location.href = ctx + (['reviewer','decision_maker','viewer'].includes(role)?'/review/dashboard.jsp':'/' + role + '/dashboard.jsp');
+          const placementId = new URLSearchParams(window.location.search).get('placementId');
+          if (role === 'applicant' && /^[A-Za-z0-9_-]{1,200}$/.test(placementId || '')) {
+            window.location.href = ctx + '/applicant/assignments.jsp?assignmentId=' + encodeURIComponent(placementId);
+            return;
+          }
+          window.location.href = ctx + (['organiser','reviewer','decision_maker','viewer'].includes(role)?'/review/dashboard.jsp':'/' + role + '/dashboard.jsp');
         }, 1000);
       } catch (err) {
         if(mascotAnim) mascotAnim.triggerFail();

@@ -4,4 +4,4 @@
 <jsp:include page="/common/assignments-content.jsp" />
 <jsp:include page="/common/layout-bottom.jsp" />
 <script src="<%= request.getContextPath() %>/static/js/assignment-time.js"></script>
-<script src="<%= request.getContextPath() %>/static/js/assignments.js?v=course-access-1"></script>
+<script src="<%= request.getContextPath() %>/static/js/assignments.js?v=direct-assignment-1"></script>

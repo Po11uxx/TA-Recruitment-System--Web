@@ -22,7 +22,8 @@ public class SectionAssignmentServlet extends HttpServlet {
     @Override protected void doPost(HttpServletRequest req,HttpServletResponse resp) throws IOException {
         try {
             String path=JsonUtil.getPathInfo(req); SectionAssignment a; String action;
-            if (path.isEmpty()) { a=service.assign(user(req),role(req),JsonUtil.readRequestBodyAsJson(req)); action="Created";resp.setStatus(201); }
+            if ("direct".equals(path)) { a=service.assignDirect(user(req),role(req),JsonUtil.readRequestBodyAsJson(req)); action="Direct draft created";resp.setStatus(201); }
+            else if (path.isEmpty()) { a=service.assign(user(req),role(req),JsonUtil.readRequestBodyAsJson(req)); action="Created";resp.setStatus(201); }
             else if (path.matches("[\\w]+/publish")) { a=service.publish(user(req),role(req),path.split("/")[0],JsonUtil.readRequestBodyAsJson(req)); action="Published"; }
             else if (path.matches("[\\w]+/respond")) { a=service.respond(user(req),role(req),path.split("/")[0],JsonUtil.readRequestBodyAsJson(req)); action="Responded"; }
             else if (path.matches("[\\w]+/cancel")) { a=service.cancel(user(req),role(req),path.split("/")[0],JsonUtil.readRequestBodyAsJson(req)); action="Cancelled"; }

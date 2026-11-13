@@ -79,3 +79,7 @@ docker compose exec -T db pg_restore -U tamo -d tamo_recovered --exit-on-error -
 当前为本地可运行 MVP，使用本地账号和站内通知，没有接入 UCI SSO、学校培训核验、真实学生信息、外发邮件、HR 或工资系统。生产部署需学校确认数据保存政策、账号接入与授权负责人，配置 HTTPS、受限网络和非演示凭据，并进行学校要求的安全与可访问性审查。数据库默认只监听本机；Java 服务对外部署应由受控反向代理提供访问。
 
 本文件原有验收后的 CSV 扩展已完成，见上述新版说明。
+
+## 待 IT 接入：正式发布 Offer 后立即发送邮件
+
+Admin 正式发布 TA placement 时，系统在同一数据库事务中保存待发送邮件记录，普通申请和直接分配均适用。实际邮件发送、失败重试及上线验收由 IT 负责。此事项在验收完成前持续保留。见 [Offer email IT handoff](docs/offer-email-it-handoff.md)。

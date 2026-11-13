@@ -22,30 +22,25 @@ class TeacherSelectionServiceTest {
     }
     void denied(int status,String user,JsonObject b){String before=JsonUtil.getGson().toJson(ds);var e=assertThrows(QualificationService.Problem.class,()->select(user,b));assertEquals(status,e.status);assertEquals(before,JsonUtil.getGson().toJson(ds),"Failed selection must not leave any mutations");}
     @Test void defaultTeacherHasDecisionPermission(){assertTrue(ReviewAccess.defaults("organiser").contains("review.approve"));assertFalse(ReviewAccess.defaults("reviewer").contains("review.approve"));}
-    @Test void selectRecordsDecisionAndDraftWithoutPublishing(){var result=select("u005",body());assertEquals("draft",result.get("publicationStatus").getAsString());assertEquals(app.getId(),result.get("applicationId").getAsString());assertTrue(ReviewService.approvedForSection(ds,app.getId(),section.getId()));assertEquals("offer",app.getStatus());assertEquals(1,ds.getSectionAssignments().size());var assignment=ds.getSectionAssignments().get(0);assertEquals("u005",assignment.getAssignedBy());assertEquals("draft",assignment.getPublicationStatus());assertEquals(assignment.getId(),result.get("assignmentId").getAsString());assertEquals("u005",ds.getReviewRecords().get(0).getActorId());assertNotNull(ds.getReviewRecords().get(0).getCriteriaSnapshot());assertTrue(ds.getNotifications().stream().noneMatch(n->"assignment_published".equals(n.getType())));}
-    @Test void adminNeedsBothGrantsForDirectSelection(){
-        User admin=ReviewAccess.user(ds,"u010");
-        assertEquals(403,assertThrows(QualificationService.Problem.class,()->select("u010",body())).status);
-        admin.setCourseIds(java.util.List.of("m001"));
-        admin.setPermissions(java.util.List.of("review.approve"));
-        assertEquals(403,assertThrows(QualificationService.Problem.class,()->select("u010",body())).status);
-        admin.setPermissions(java.util.List.of("review.approve",ReviewAccess.MANAGE_ASSIGNMENTS));
-        assertNotNull(select("u010",body()).get("assignmentId"));
+    @Test void selectRecordsDecisionAndDraftWithoutPublishing(){var result=select("u010",body());assertEquals("draft",result.get("publicationStatus").getAsString());assertEquals(app.getId(),result.get("applicationId").getAsString());assertTrue(ReviewService.approvedForSection(ds,app.getId(),section.getId()));assertEquals("offer",app.getStatus());assertEquals(1,ds.getSectionAssignments().size());var assignment=ds.getSectionAssignments().get(0);assertEquals("u010",assignment.getAssignedBy());assertEquals("draft",assignment.getPublicationStatus());assertEquals(assignment.getId(),result.get("assignmentId").getAsString());assertEquals("u010",ds.getReviewRecords().get(0).getActorId());assertNotNull(ds.getReviewRecords().get(0).getCriteriaSnapshot());assertTrue(ds.getNotifications().stream().noneMatch(n->"assignment_published".equals(n.getType())));}
+    @Test void teacherDecidesWithoutCreatingAPlacement(){
+        denied(403,"u005",body());
+        JsonObject decision=body();decision.addProperty("action","approve");
+        new ReviewService(data).record("u005",app.getId(),decision);
+        assertEquals("offer",app.getStatus());assertTrue(ds.getSectionAssignments().isEmpty());
     }
-    @Test void explicitRevocationIsPreserved(){ds.getUsers().stream().filter(u->"u005".equals(u.getId())).forEach(u->u.setPermissions(List.of("review.read","review.recommend")));denied(403,"u005",body());}
-    @Test void readPermissionStillRequired(){ds.getUsers().stream().filter(u->"u005".equals(u.getId())).forEach(u->u.setPermissions(List.of("review.approve")));denied(403,"u005",body());}
     @Test void otherTeacherAndApplicantDenied(){denied(403,"u006",body());denied(403,"u001",body());}
-    @Test void inactiveTeacherDenied(){ds.getUsers().stream().filter(u->"u005".equals(u.getId())).forEach(u->u.setStatus("suspended"));denied(403,"u005",body());}
-    @Test void fullSectionLeavesNoApproval(){section.setTaPositions(0);denied(409,"u005",body());}
-    @Test void conflictingAvailabilityLeavesNoApproval(){app.getAvailabilitySnapshot().setConflictSlots(app.getAvailabilitySnapshot().getAvailableSlots());denied(409,"u005",body());}
-    @Test void pendingRequiresExplicitConfirmation(){app.setAvailabilitySnapshot(null);denied(409,"u005",body());var b=body();b.addProperty("confirmPending",true);b.addProperty("manualConfirmationNote","Confirmed availability directly with applicant.");select("u005",b);assertEquals("Confirmed availability directly with applicant.",ds.getSectionAssignments().get(0).getManualConfirmationNote());}
-    @Test void missingSectionAndShortReasonDenied(){var b=body();b.remove("sectionId");denied(400,"u005",b);b=body();b.addProperty("note","short");denied(400,"u005",b);}
-    @Test void wrongCycleDeniedWithoutMutation(){section.setPeriodId("different");denied(400,"u005",body());}
-    @Test void existingDecisionCannotBeSilentlyOverwritten(){var b=body();b.addProperty("action","not_selected");new ReviewService(data).record("u005",app.getId(),b);denied(409,"u005",body());}
-    @Test void retryCannotCreateDuplicate(){select("u005",body());denied(409,"u005",body());assertEquals(1,ds.getReviewRecords().size());assertEquals(1,ds.getSectionAssignments().size());}
-    @Test void rowAdvertisesActionOnlyBeforeDecision(){var row=new ReviewService(data).row(ReviewAccess.user(ds,"u005"),app);assertTrue(row.get("canSelectTa").getAsBoolean());select("u005",body());row=new ReviewService(data).row(ReviewAccess.user(ds,"u005"),app);assertFalse(row.get("canSelectTa").getAsBoolean());assertEquals(ds.getSectionAssignments().get(0).getId(),row.get("selectionAssignmentId").getAsString());}
-    @Test void withdrawnApplicationCannotBeSelected(){app.setStatus("withdrawn");denied(409,"u005",body());}
-    @Test void archivedSectionCannotBeSelected(){section.setStatus("archived");denied(409,"u005",body());}
-    @Test void inactiveApplicantCannotBeSelected(){ds.getUsers().stream().filter(u->app.getApplicantId().equals(u.getId())).forEach(u->u.setStatus("suspended"));denied(409,"u005",body());}
-    @Test void sectionOutsidePostingIsDenied(){ds.getJobs().stream().filter(j->app.getJobId().equals(j.getId())).forEach(j->j.setSectionIds(List.of("another")));denied(400,"u005",body());}
+    @Test void inactiveTeacherDenied(){ds.getUsers().stream().filter(u->"u010".equals(u.getId())).forEach(u->u.setStatus("suspended"));denied(403,"u010",body());}
+    @Test void fullSectionLeavesNoApproval(){section.setTaPositions(0);denied(409,"u010",body());}
+    @Test void conflictingAvailabilityLeavesNoApproval(){app.getAvailabilitySnapshot().setConflictSlots(app.getAvailabilitySnapshot().getAvailableSlots());denied(409,"u010",body());}
+    @Test void pendingRequiresExplicitConfirmation(){app.setAvailabilitySnapshot(null);denied(409,"u010",body());var b=body();b.addProperty("confirmPending",true);b.addProperty("manualConfirmationNote","Confirmed availability directly with applicant.");select("u010",b);assertEquals("Confirmed availability directly with applicant.",ds.getSectionAssignments().get(0).getManualConfirmationNote());}
+    @Test void missingSectionAndShortReasonDenied(){var b=body();b.remove("sectionId");denied(400,"u010",b);b=body();b.addProperty("note","short");denied(400,"u010",b);}
+    @Test void wrongCycleDeniedWithoutMutation(){section.setPeriodId("different");denied(400,"u010",body());}
+    @Test void existingDecisionCannotBeSilentlyOverwritten(){var b=body();b.addProperty("action","not_selected");new ReviewService(data).record("u005",app.getId(),b);denied(409,"u010",body());}
+    @Test void retryCannotCreateDuplicate(){select("u010",body());denied(409,"u010",body());assertEquals(1,ds.getReviewRecords().size());assertEquals(1,ds.getSectionAssignments().size());}
+    @Test void rowAdvertisesActionOnlyBeforeDecision(){var row=new ReviewService(data).row(ReviewAccess.user(ds,"u010"),app);assertTrue(row.get("canSelectTa").getAsBoolean());select("u010",body());row=new ReviewService(data).row(ReviewAccess.user(ds,"u010"),app);assertFalse(row.get("canSelectTa").getAsBoolean());assertEquals(ds.getSectionAssignments().get(0).getId(),row.get("selectionAssignmentId").getAsString());}
+    @Test void withdrawnApplicationCannotBeSelected(){app.setStatus("withdrawn");denied(409,"u010",body());}
+    @Test void archivedSectionCannotBeSelected(){section.setStatus("archived");denied(409,"u010",body());}
+    @Test void inactiveApplicantCannotBeSelected(){ds.getUsers().stream().filter(u->app.getApplicantId().equals(u.getId())).forEach(u->u.setStatus("suspended"));denied(409,"u010",body());}
+    @Test void sectionOutsidePostingIsDenied(){ds.getJobs().stream().filter(j->app.getJobId().equals(j.getId())).forEach(j->j.setSectionIds(List.of("another")));denied(400,"u010",body());}
 }

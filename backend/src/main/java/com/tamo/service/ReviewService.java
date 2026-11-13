@@ -23,7 +23,7 @@ public class ReviewService{
  }
  private String string(JsonObject value,String key){JsonElement v=value.get(key);return v==null||v.isJsonNull()?"":v.getAsString();}
  private double score(JsonObject r){JsonElement v=r.getAsJsonObject("matching").get("score");return v==null||v.isJsonNull()?-1:v.getAsDouble();}
- private boolean matches(JsonObject r,Map<String,String> f){JsonObject q=r.getAsJsonObject("qualifications");for(String key:List.of("periodId","moduleId","selectionStatus"))if(f.containsKey(key)&&!f.get(key).isBlank()&&!f.get(key).equals(r.get(key).getAsString()))return false;
+ private boolean matches(JsonObject r,Map<String,String> f){JsonObject q=r.getAsJsonObject("qualifications");for(String key:List.of("id","periodId","moduleId","selectionStatus"))if(f.containsKey(key)&&!f.get(key).isBlank()&&!f.get(key).equals(r.get(key).getAsString()))return false;
   if(f.containsKey("level")&&!f.get("level").isBlank()&&(!q.has("studentLevel")||!f.get("level").equals(q.get("studentLevel").getAsString())))return false;
   for(String[] field:new String[][]{{"skill","skills"},{"interest","interests"}})if(f.containsKey(field[0])&&!f.get(field[0]).isBlank()){boolean found=false;if(q.has(field[1]))for(JsonElement term:q.getAsJsonArray(field[1]))if(term.getAsString().toLowerCase(Locale.ROOT).contains(f.get(field[0]).toLowerCase(Locale.ROOT)))found=true;if(!found)return false;}
   if(f.containsKey("experience")&&!f.get("experience").isBlank()){boolean has=q.has("teachingExperience")&&!q.get("teachingExperience").getAsString().isBlank();if(has!=f.get("experience").equals("yes"))return false;}

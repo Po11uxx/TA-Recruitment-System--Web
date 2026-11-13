@@ -71,9 +71,47 @@ class PostgresStoreTest {
 
     @Test void sponsorCsvBatchAndSectionEvidenceSurviveDatabaseReconnect() throws Exception {
         store.begin();var detached=com.tamo.service.JsonDataService.detached(store.load());var csv=new com.tamo.service.SponsorCsvService(detached);Path samples=Path.of("../Test_Data");if(!Files.isDirectory(samples))samples=Path.of("Test_Data");
+        Path courseFile=samples.resolve("Courses & Sections Dataset.csv");
+        var courses=com.tamo.service.SponsorCsv.read(Files.readString(courseFile),com.tamo.service.SponsorCsvService.COURSES);
+        for(var row:courses){
+            String code=row.get("Course ID");
+            if(detached.getData().getModules().stream().anyMatch(m->code.equals(m.getCode())))continue;
+            var course=new com.tamo.model.Module();course.setId(code.replace(" ","_"));course.setCode(code);
+            course.setName(row.get("Course Name"));course.setOrganiserId("u005");course.setOrganiserName("Teacher");course.setStatus("active");
+            detached.getData().getModules().add(course);
+        }
         for(String[] pair:new String[][]{{"courses","Courses & Sections Dataset.csv"},{"students","Student Applications Dataset(Updated).csv"},{"selections","Selection & Assignment Management Dataset(Updated).csv"}}){var b=new com.google.gson.JsonObject();b.addProperty("dataset",pair[0]);b.addProperty("csv",Files.readString(samples.resolve(pair[1])));b.addProperty("periodId","period_test");b.addProperty("organiserId","u005");b.addProperty("hoursPerWeek",4);var preview=csv.run("u010",b,false);assertEquals(0,preview.get("errors").getAsInt(),preview.toString());b.add("previewToken",preview.get("previewToken"));csv.run("u010",b,true);}
         store.save(detached.getData());store.commit();store.close();store.begin();DataStore actual=store.load();assertEquals(6,actual.getCourseSections().size());assertEquals(6,actual.getReviewRecords().size());assertNotNull(actual.getCourseSections().get(0).getMatchingCriteria());assertNotNull(actual.getReviewRecords().get(0).getSectionId());assertNotNull(actual.getReviewRecords().get(0).getSourceMetadata());assertTrue(actual.getSectionAssignments().isEmpty());
         var exporter=new com.tamo.service.SponsorCsvService(com.tamo.service.JsonDataService.detached(actual));assertEquals(20,com.tamo.service.SponsorCsv.read(exporter.export("u010","students","period_test",false),com.tamo.service.SponsorCsvService.STUDENTS).size());
+    }
+
+    @Test void directAssignmentPersistsWithoutAnApplication() throws Exception {
+        store.begin();
+        DataStore ds=store.load();
+        var sectionBody=com.google.gson.JsonParser.parseString("""
+                {"periodId":"period_test","name":"Direct lab","type":"lab","taPositions":1,
+                 "hoursPerWeek":4,"timeZone":"America/Los_Angeles",
+                 "meetingTimes":[{"dayOfWeek":1,"startTime":"10:00","endTime":"12:00"}]}
+                """).getAsJsonObject();
+        var service=new com.tamo.service.CourseSectionService(com.tamo.service.JsonDataService.detached(ds));
+        var section=service.create("u010","admin","m001",sectionBody);
+        var request=com.google.gson.JsonParser.parseString("""
+                {"periodId":"period_test","applicantId":"u001",
+                 "reason":"Approved staffing exception","confirmPending":true,
+                 "manualConfirmationNote":"Confirmed schedule with student."}
+                """).getAsJsonObject();
+        request.addProperty("sectionId",section.getId());
+        var assignments=assignmentService(ds);
+        var assignment=assignments.assignDirect("u010","admin",request);
+        assignments.publish("u010","admin",assignment.getId(),new com.google.gson.JsonObject());
+        store.save(ds);store.commit();store.close();store.begin();
+        DataStore reloaded=store.load();
+        var saved=reloaded.getSectionAssignments().stream()
+                .filter(a->assignment.getId().equals(a.getId())).findFirst().orElseThrow();
+        assertEquals(assignment.getId(),reloaded.getOfferEmails().get(0).id());
+        assertEquals("published",saved.getPublicationStatus());
+        assertNull(saved.getApplicationId());
+        assertEquals("Approved staffing exception",saved.getDirectReason());
     }
 
     @Test void importsEveryCollectionAndPreservesBackup() throws Exception {
@@ -90,8 +128,8 @@ class PostgresStoreTest {
     @Test void upgradesV6PendingOffersWithSevenDayGraceWithoutExpiringAcceptedOnes() throws Exception {
         store.begin();DataStore ds=store.load();CourseSection section=assignmentSection();section.setTaPositions(2);ds.getCourseSections().add(section);
         ds.getApplications().get(0).setStatus("offer");ds.getApplications().get(2).setStatus("offer");var service=assignmentService(ds);
-        SectionAssignment pending=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",pending.getId(),deadlineBody());
-        SectionAssignment accepted=service.assign("u005","organiser",assignmentBody("a003"));service.publish("u005","organiser",accepted.getId(),deadlineBody());
+        SectionAssignment pending=service.assign("u010","admin",assignmentBody("a001"));service.publish("u010","admin",pending.getId(),deadlineBody());
+        SectionAssignment accepted=service.assign("u010","admin",assignmentBody("a003"));service.publish("u010","admin",accepted.getId(),deadlineBody());
         com.google.gson.JsonObject reply=new com.google.gson.JsonObject();reply.addProperty("decision","accept");service.respond("u002","applicant",accepted.getId(),reply);
         store.save(ds);store.commit();store.close();
         try(Connection conn=DriverManager.getConnection(url,user,password);Statement stmt=conn.createStatement()) {
@@ -104,7 +142,7 @@ class PostgresStoreTest {
     }
     @Test void publicationWithoutDeadlineAndLegacyReplyPersistAcrossReconnect() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");var service=assignmentService(ds);
-        SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),new com.google.gson.JsonObject());assertNull(a.getResponseDeadline());
+        SectionAssignment a=service.assign("u010","admin",assignmentBody("a001"));service.publish("u010","admin",a.getId(),new com.google.gson.JsonObject());assertNull(a.getResponseDeadline());
         store.save(ds);store.commit();store.close();
         store.begin();DataStore pending=store.load();SectionAssignment row=pending.getSectionAssignments().get(0);assertEquals("pending",row.getResponseStatus());assertNull(row.getResponseDeadline());
         row.setResponseDeadline("2020-01-01T00:00:00Z");store.save(pending);store.commit();store.close();
@@ -115,7 +153,7 @@ class PostgresStoreTest {
 
     @Test void v15RemovesMandatoryDeadlineWithoutDeletingLegacyMetadata() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");var service=assignmentService(ds);
-        SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),new com.google.gson.JsonObject());a.setResponseDeadline("2020-01-01T00:00:00Z");
+        SectionAssignment a=service.assign("u010","admin",assignmentBody("a001"));service.publish("u010","admin",a.getId(),new com.google.gson.JsonObject());a.setResponseDeadline("2020-01-01T00:00:00Z");
         store.save(ds);store.commit();store.close();
         try(Connection conn=DriverManager.getConnection(url,user,password);Statement stmt=conn.createStatement()) {
             stmt.execute("ALTER TABLE section_assignments ADD CONSTRAINT assignment_pending_deadline CHECK (status <> 'active' OR publication_status <> 'published' OR response_status <> 'pending' OR response_deadline IS NOT NULL)");
@@ -129,7 +167,7 @@ class PostgresStoreTest {
 
     @Test void upgradesExistingV5AssignmentsAsUnpublishedWithoutSendingNotifications() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");
-        assignmentService(ds).assign("u005","organiser",assignmentBody("a001"));store.save(ds);store.commit();store.close();
+        assignmentService(ds).assign("u010","admin",assignmentBody("a001"));store.save(ds);store.commit();store.close();
         try (Connection conn=DriverManager.getConnection(url,user,password);Statement stmt=conn.createStatement()) {
             stmt.execute("ALTER TABLE section_assignments DROP COLUMN publication_status CASCADE, DROP COLUMN published_by CASCADE, DROP COLUMN published_at CASCADE, DROP COLUMN response_status CASCADE, DROP COLUMN responded_at CASCADE, DROP COLUMN response_reason CASCADE, DROP COLUMN response_deadline CASCADE, DROP COLUMN expired_at CASCADE");
             stmt.execute("DELETE FROM tamo_schema_version WHERE version>=6");
@@ -140,15 +178,15 @@ class PostgresStoreTest {
     }
     @Test void publicationDeclineAndNotificationMetadataSurviveReconnect() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");
-        var service=assignmentService(ds);SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),deadlineBody());
+        var service=assignmentService(ds);SectionAssignment a=service.assign("u010","admin",assignmentBody("a001"));service.publish("u010","admin",a.getId(),deadlineBody());
         com.google.gson.JsonObject reply=new com.google.gson.JsonObject();reply.addProperty("decision","decline");reply.addProperty("reason","Another commitment");service.respond("u001","applicant",a.getId(),reply);
         store.save(ds);store.commit();store.close();store.begin();DataStore actual=store.load();SectionAssignment saved=actual.getSectionAssignments().get(0);
-        assertEquals("published",saved.getPublicationStatus());assertEquals("u005",saved.getPublishedBy());assertNotNull(saved.getPublishedAt());assertEquals("declined",saved.getResponseStatus());assertEquals("cancelled",saved.getStatus());assertEquals("Another commitment",saved.getResponseReason());assertNotNull(saved.getRespondedAt());
+        assertEquals("published",saved.getPublicationStatus());assertEquals("u010",saved.getPublishedBy());assertNotNull(saved.getPublishedAt());assertEquals("declined",saved.getResponseStatus());assertEquals("cancelled",saved.getStatus());assertEquals("Another commitment",saved.getResponseReason());assertNotNull(saved.getRespondedAt());
         assertEquals(2,actual.getNotifications().stream().filter(n->a.getId().equals(n.getRelatedId())).count());
     }
     @Test void concurrentRepliesProduceOneDecisionAndOneResponseNotification() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");
-        var service=assignmentService(ds);SectionAssignment a=service.assign("u005","organiser",assignmentBody("a001"));service.publish("u005","organiser",a.getId(),deadlineBody());store.save(ds);store.commit();store.close();
+        var service=assignmentService(ds);SectionAssignment a=service.assign("u010","admin",assignmentBody("a001"));service.publish("u010","admin",a.getId(),deadlineBody());store.save(ds);store.commit();store.close();
         store.begin();DataStore first=store.load();com.google.gson.JsonObject accept=new com.google.gson.JsonObject();accept.addProperty("decision","accept");assignmentService(first).respond("u001","applicant",a.getId(),accept);store.save(first);
         ExecutorService executor=Executors.newSingleThreadExecutor();CountDownLatch started=new CountDownLatch(1);
         try {
@@ -167,6 +205,7 @@ class PostgresStoreTest {
         store.close();
         try (Connection conn=DriverManager.getConnection(url,user,password); Statement stmt=conn.createStatement()) {
             stmt.execute("DROP TABLE review_records");
+            stmt.execute("DROP TABLE offer_emails");
             stmt.execute("DROP TABLE section_assignments"); stmt.execute("DELETE FROM tamo_schema_version WHERE version>=5");
         }
         Files.writeString(seed,"must not reimport");store.initialize(seed,temp.resolve("backups"));
@@ -190,12 +229,12 @@ class PostgresStoreTest {
     }
     @Test void assignmentSnapshotsCancellationAndUniqueConstraintPersistAcrossConnections() throws Exception {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());ds.getApplications().get(0).setStatus("offer");
-        SectionAssignment assigned=assignmentService(ds).assign("u005","organiser",assignmentBody("a001"));
+        SectionAssignment assigned=assignmentService(ds).assign("u010","admin",assignmentBody("a001"));
         store.save(ds);store.commit();store.close();store.begin();ds=store.load();
         assertEquals(8.5,ds.getSectionAssignments().get(0).getSectionSnapshot().getHoursPerWeek());
         SectionAssignment duplicate=JsonUtil.getGson().fromJson(JsonUtil.getGson().toJson(assigned),SectionAssignment.class);duplicate.setId("duplicate");ds.getSectionAssignments().add(duplicate);
         DataStore invalid=ds;assertThrows(SQLException.class,()->store.save(invalid));store.close();store.begin();ds=store.load();assertEquals(1,ds.getSectionAssignments().size());
-        com.google.gson.JsonObject reason=new com.google.gson.JsonObject();reason.addProperty("reason","Test cancellation");assignmentService(ds).cancel("u005","organiser",assigned.getId(),reason);
+        com.google.gson.JsonObject reason=new com.google.gson.JsonObject();reason.addProperty("reason","Test cancellation");assignmentService(ds).cancel("u010","admin",assigned.getId(),reason);
         store.save(ds);store.commit();store.close();store.begin();
         SectionAssignment actual=store.load().getSectionAssignments().get(0);assertEquals("cancelled",actual.getStatus());assertEquals("Test cancellation",actual.getCancellationReason());assertNotNull(actual.getCancelledAt());
     }
@@ -203,14 +242,14 @@ class PostgresStoreTest {
         store.begin();DataStore ds=store.load();ds.getCourseSections().add(assignmentSection());
         ds.getApplications().stream().filter(a->"a001".equals(a.getId())||"a003".equals(a.getId())).forEach(a->a.setStatus("offer"));
         store.save(ds);store.commit();store.close();store.begin();DataStore first=store.load();
-        assignmentService(first).assign("u005","organiser",assignmentBody("a001"));store.save(first);
+        assignmentService(first).assign("u010","admin",assignmentBody("a001"));store.save(first);
         ExecutorService executor=Executors.newSingleThreadExecutor();CountDownLatch started=new CountDownLatch(1);
         try {
             Future<Integer> second=executor.submit(()->{
                 PostgresStore other=new PostgresStore(url,user,password);started.countDown();
                 try {
                     other.begin();DataStore fresh=other.load();
-                    try { assignmentService(fresh).assign("u005","organiser",assignmentBody("a003"));return 201; }
+                    try { assignmentService(fresh).assign("u010","admin",assignmentBody("a003"));return 201; }
                     catch(com.tamo.service.SectionAssignmentService.Problem e) {return e.status;}
                 } finally {other.close();}
             });
@@ -224,6 +263,7 @@ class PostgresStoreTest {
         try (Connection conn = DriverManager.getConnection(url, user, password);
              Statement stmt = conn.createStatement()) {
             stmt.execute("DROP TABLE review_records");
+            stmt.execute("DROP TABLE offer_emails");
             stmt.execute("DROP TABLE section_assignments");
             stmt.execute("DELETE FROM tamo_schema_version WHERE version>=5");
             stmt.execute("DROP TABLE course_sections");
